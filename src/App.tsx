@@ -24,10 +24,7 @@ import {
   AlertCircle,
   Users,
   BarChart3,
-  LogOut,
-  ArrowRight,
-  ChevronDown,
-  Plus
+  LogOut
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AccountingProvider, useAccounting } from './context/AccountingContext';
@@ -74,25 +71,28 @@ function DashboardContent({ session }: { session: Session }) {
   };
 
   const renderDashboard = () => (
-    <div className="p-12 space-y-12">
-      <header className="flex justify-between items-center">
+    <div className="p-8 space-y-8">
+      <header className="flex justify-between items-end">
         <div>
-          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
+          <p className="text-gray-500 mt-1">Real-time overview for {company.company_name}</p>
         </div>
-        <div className="flex gap-4">
-          <div className="relative group">
-            <button 
-              className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 text-sm font-bold"
-            >
-              Create New <ArrowRight className="w-4 h-4" />
-            </button>
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
-              <button onClick={() => setActiveTab('sales')} className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">Sales Invoice</button>
-              <button onClick={() => setActiveTab('purchase')} className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">Purchase Invoice</button>
-              <button onClick={() => setActiveTab('vendors')} className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">New Vendor</button>
-              <button onClick={() => setActiveTab('customers')} className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">New Customer</button>
-            </div>
-          </div>
+        <div className="flex gap-3">
+          <button 
+            onClick={() => handleUpload('sales')}
+            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm text-sm font-medium"
+          >
+            <Upload className="w-4 h-4" /> Upload Sales
+          </button>
+          <button 
+            onClick={() => handleUpload('purchase')}
+            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm font-medium"
+          >
+            <Upload className="w-4 h-4" /> Upload Purchase
+          </button>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm font-medium">
+            <FileText className="w-4 h-4" /> Generate Report
+          </button>
         </div>
       </header>
 
@@ -250,29 +250,11 @@ function DashboardContent({ session }: { session: Session }) {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
-        <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-12 sticky top-0 z-10">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Company</span>
-              <span className="text-sm font-bold text-gray-900">{company.company_name}</span>
-            </div>
-            <div className="h-6 w-[1px] bg-gray-200" />
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Filter</span>
-              <select 
-                value={company.financialYear}
-                onChange={(e) => {
-                  // In a real app, we'd update the context state here
-                  // For now, we'll just log it as the context handles the state
-                  console.log('Changing FY to:', e.target.value);
-                }}
-                className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
-              >
-                <option value="2025-26">FY 2025-26</option>
-                <option value="2024-25">FY 2024-25</option>
-                <option value="2026-27">FY 2026-27</option>
-              </select>
-            </div>
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-400 uppercase tracking-widest">Active Company</span>
+            <div className="h-4 w-[1px] bg-gray-200 mx-2" />
+            <span className="text-sm font-bold text-gray-900">{company.company_name}</span>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">
