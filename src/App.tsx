@@ -22,16 +22,15 @@ import {
   Building2,
   Upload,
   AlertCircle,
-  CheckCircle2,
-  Clock,
-  ArrowRight,
   Users,
   BarChart3,
-  LogOut
+  LogOut,
+  ArrowRight,
+  ChevronDown,
+  Plus
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { AccountingProvider, useAccounting } from './context/AccountingContext';
-import { Task } from './types';
 import { PurchaseEntryModule } from './components/PurchaseEntryModule';
 import { SalesEntryModule } from './components/SalesEntryModule';
 import { VendorMasterModule } from './components/VendorMasterModule';
@@ -43,7 +42,7 @@ import { supabase } from './lib/supabase';
 import { Session } from '@supabase/supabase-js';
 
 function DashboardContent({ session }: { session: Session }) {
-  const { company, addTask, moveTask } = useAccounting();
+  const { company } = useAccounting();
   const [activeTab, setActiveTab] = useState('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
@@ -70,33 +69,30 @@ function DashboardContent({ session }: { session: Session }) {
   ];
 
   const handleUpload = (type: 'sales' | 'purchase') => {
-    const fileName = `${type}_invoice_${Math.floor(Math.random() * 1000)}.pdf`;
-    addTask(`New ${type} invoice upload`, type, 'pending', fileName);
+    // Task queue removed, but we can keep the alert or just log for now
+    console.log(`Uploading ${type} invoice...`);
   };
 
   const renderDashboard = () => (
-    <div className="p-8 space-y-8">
-      <header className="flex justify-between items-end">
+    <div className="p-12 space-y-12">
+      <header className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
-          <p className="text-gray-500 mt-1">Real-time overview for {company.company_name}</p>
+          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
         </div>
-        <div className="flex gap-3">
-          <button 
-            onClick={() => handleUpload('sales')}
-            className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm text-sm font-medium"
-          >
-            <Upload className="w-4 h-4" /> Upload Sales
-          </button>
-          <button 
-            onClick={() => handleUpload('purchase')}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm font-medium"
-          >
-            <Upload className="w-4 h-4" /> Upload Purchase
-          </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm font-medium">
-            <FileText className="w-4 h-4" /> Generate Report
-          </button>
+        <div className="flex gap-4">
+          <div className="relative group">
+            <button 
+              className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 text-sm font-bold"
+            >
+              Create New <ArrowRight className="w-4 h-4" />
+            </button>
+            <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 overflow-hidden">
+              <button onClick={() => setActiveTab('sales')} className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">Sales Invoice</button>
+              <button onClick={() => setActiveTab('purchase')} className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">Purchase Invoice</button>
+              <button onClick={() => setActiveTab('vendors')} className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">New Vendor</button>
+              <button onClick={() => setActiveTab('customers')} className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">New Customer</button>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -117,80 +113,6 @@ function DashboardContent({ session }: { session: Session }) {
             </div>
             <p className="text-2xl font-bold mt-4 text-gray-900">{stat.value}</p>
             <p className="text-sm font-medium text-gray-500 mt-1">{stat.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Kanban Task Queue */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {(['urgent', 'pending', 'done'] as const).map((status) => (
-          <div key={status} className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-4 px-2">
-              <div className="flex items-center gap-2">
-                <h3 className="font-bold text-gray-900 capitalize">{status}</h3>
-                <span className="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-0.5 rounded-full">
-                  {company.task_queue[status].length}
-                </span>
-              </div>
-              {status === 'urgent' && <AlertCircle className="w-4 h-4 text-red-500" />}
-              {status === 'pending' && <Clock className="w-4 h-4 text-orange-500" />}
-              {status === 'done' && <CheckCircle2 className="w-4 h-4 text-green-500" />}
-            </div>
-            
-            <div className="bg-gray-50/50 p-3 rounded-2xl border border-dashed border-gray-200 flex-1 space-y-3 min-h-[400px]">
-              {company.task_queue[status].map((task) => (
-                <motion.div
-                  layoutId={task.id}
-                  key={task.id}
-                  className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${
-                      task.type === 'sales' ? 'bg-green-100 text-green-700' : 
-                      task.type === 'purchase' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-                    }`}>
-                      {task.type}
-                    </span>
-                    <span className="text-[10px] text-gray-400 font-mono">{task.createdAt}</span>
-                  </div>
-                  <h4 className="text-sm font-semibold text-gray-900 leading-tight">{task.title}</h4>
-                  {task.fileName && (
-                    <div className="mt-2 flex items-center gap-1.5 text-xs text-gray-500 bg-gray-50 p-1.5 rounded border border-gray-100">
-                      <FileText className="w-3 h-3" />
-                      <span className="truncate">{task.fileName}</span>
-                    </div>
-                  )}
-                  
-                  {task.validationErrors && task.validationErrors.length > 0 && (
-                    <div className="mt-3 p-2 bg-red-50 rounded-lg border border-red-100">
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-red-700 uppercase mb-1">
-                        <AlertCircle className="w-3 h-3" /> Validation Errors
-                      </div>
-                      <ul className="text-[10px] text-red-600 list-disc list-inside space-y-0.5">
-                        {task.validationErrors.map((err, idx) => <li key={idx}>{err}</li>)}
-                      </ul>
-                    </div>
-                  )}
-
-                  <div className="mt-4 flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {status !== 'done' && (
-                      <button 
-                        onClick={() => moveTask(task.id, status === 'urgent' ? 'pending' : 'done')}
-                        className="p-1.5 hover:bg-indigo-50 text-indigo-600 rounded-lg transition-colors"
-                        title="Move Forward"
-                      >
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                    )}
-                  </div>
-                </motion.div>
-              ))}
-              {company.task_queue[status].length === 0 && (
-                <div className="h-full flex items-center justify-center text-gray-400 text-xs italic">
-                  No tasks in {status}
-                </div>
-              )}
-            </div>
           </div>
         ))}
       </div>
@@ -328,11 +250,29 @@ function DashboardContent({ session }: { session: Session }) {
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-gray-400 uppercase tracking-widest">Active Company</span>
-            <div className="h-4 w-[1px] bg-gray-200 mx-2" />
-            <span className="text-sm font-bold text-gray-900">{company.company_name}</span>
+        <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-12 sticky top-0 z-10">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Company</span>
+              <span className="text-sm font-bold text-gray-900">{company.company_name}</span>
+            </div>
+            <div className="h-6 w-[1px] bg-gray-200" />
+            <div className="flex items-center gap-3">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">Filter</span>
+              <select 
+                value={company.financialYear}
+                onChange={(e) => {
+                  // In a real app, we'd update the context state here
+                  // For now, we'll just log it as the context handles the state
+                  console.log('Changing FY to:', e.target.value);
+                }}
+                className="bg-gray-50 border border-gray-100 rounded-lg px-3 py-1.5 text-xs font-bold text-gray-700 focus:ring-2 focus:ring-indigo-500 outline-none cursor-pointer"
+              >
+                <option value="2025-26">FY 2025-26</option>
+                <option value="2024-25">FY 2024-25</option>
+                <option value="2026-27">FY 2026-27</option>
+              </select>
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right hidden sm:block">

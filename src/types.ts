@@ -121,4 +121,5 @@ export interface Company {
   };
   task_queue: TaskQueue;
   reports_snapshot: ReportsSnapshot;
+  financialYear: string;
 }

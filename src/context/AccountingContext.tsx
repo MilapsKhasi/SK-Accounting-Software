@@ -54,7 +54,8 @@ export const AccountingProvider: React.FC<{ children: React.ReactNode, session: 
       purchase_total: 0,
       gst_payable: 0,
       stock_value: 0
-    }
+    },
+    financialYear: "2025-26"
   });
 
   const fetchData = useCallback(async () => {
@@ -150,7 +151,8 @@ export const AccountingProvider: React.FC<{ children: React.ReactNode, session: 
             purchase_total: (purchases || []).reduce((sum: number, p: any) => sum + (p.net_bill || 0), 0),
             gst_payable: (sales || []).reduce((sum: number, s: any) => sum + (s.gst_amount || 0), 0) - (purchases || []).reduce((sum: number, p: any) => sum + (p.gst_amount || 0), 0),
             stock_value: (inventory || []).reduce((sum: number, i: any) => sum + (i.quantity * 100), 0)
-          }
+          },
+          financialYear: profile?.financial_year || "2025-26"
         });
       } else if (session?.user?.id) {
         await supabase.from('profiles').upsert({

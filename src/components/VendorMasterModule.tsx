@@ -34,6 +34,14 @@ export const VendorMasterModule: React.FC = () => {
   const [financialYear, setFinancialYear] = useState('2025-26');
   const [showExportDropdown, setShowExportDropdown] = useState(false);
 
+  const formatDateForExport = (dateStr: string) => {
+    const date = new Date(dateStr);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = String(date.getFullYear()).slice(-2);
+    return `${day}-${month}-${year}`;
+  };
+
   const exportToPDF = (vendor: Vendor) => {
     const doc = new jsPDF();
     const ledgerData = getLedgerData(vendor);
@@ -71,7 +79,7 @@ export const VendorMasterModule: React.FC = () => {
       startY: 65,
       head: [['DATE', 'PARTICULARS', 'DEBIT', 'CREDIT']],
       body: ledgerData.map(row => [
-        row.date,
+        formatDateForExport(row.date),
         row.particulars.toUpperCase(),
         row.debit > 0 ? row.debit.toLocaleString('en-IN') : '',
         row.credit > 0 ? row.credit.toLocaleString('en-IN') : ''
@@ -333,10 +341,9 @@ export const VendorMasterModule: React.FC = () => {
   }
 
   return (
-    <div className="p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="p-12 space-y-12 max-w-7xl mx-auto">
       <header>
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Vendor Master</h1>
-        <p className="text-gray-500 mt-1">Manage your suppliers and vendors for {company.company_name}</p>
+        <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Vendor Master</h1>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

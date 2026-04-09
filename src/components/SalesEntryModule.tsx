@@ -176,12 +176,19 @@ export const SalesEntryModule: React.FC = () => {
     await deleteSalesEntry(id);
   };
 
+  const filteredSales = company.modules.sales.filter(s => {
+    const invoiceDate = new Date(s.date);
+    const [startYear, endYearSuffix] = company.financialYear.split('-');
+    const start = new Date(`${startYear}-04-01`);
+    const end = new Date(`20${endYearSuffix}-03-31`);
+    return invoiceDate >= start && invoiceDate <= end;
+  });
+
   return (
-    <div className="p-8 space-y-8 max-w-7xl mx-auto">
+    <div className="p-12 space-y-12 max-w-7xl mx-auto">
       <header className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Sales Entry</h1>
-          <p className="text-gray-500 mt-1">Record new sales invoices for {company.company_name}</p>
+          <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Sales Entry</h1>
         </div>
         <div className="flex items-center gap-6 bg-white p-2 px-4 rounded-xl border border-gray-100 shadow-sm">
           <div className="flex items-center gap-2">
@@ -569,7 +576,7 @@ export const SalesEntryModule: React.FC = () => {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-gray-50 flex justify-between items-center">
           <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Sales Invoices Listing</h2>
-          <span className="text-xs text-gray-400 font-medium">{company.modules.sales.length} Transactions</span>
+          <span className="text-xs text-gray-400 font-medium">{filteredSales.length} Transactions</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -588,7 +595,7 @@ export const SalesEntryModule: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-gray-50">
               <AnimatePresence>
-                {company.modules.sales.map((invoice) => (
+                {filteredSales.map((invoice) => (
                   <motion.tr 
                     key={invoice.id}
                     initial={{ opacity: 0 }}
@@ -632,10 +639,10 @@ export const SalesEntryModule: React.FC = () => {
                   </motion.tr>
                 ))}
               </AnimatePresence>
-              {company.modules.sales.length === 0 && (
+              {filteredSales.length === 0 && (
                 <tr>
                   <td colSpan={9} className="p-12 text-center text-gray-400 italic text-sm">
-                    No sales transactions recorded yet.
+                    No sales transactions recorded yet for this financial year.
                   </td>
                 </tr>
               )}
