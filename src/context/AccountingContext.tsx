@@ -17,8 +17,12 @@ interface AccountingContextType {
   ensureVendorExists: (vendorName: string) => Promise<void>;
   ensureCustomerExists: (customerName: string) => Promise<void>;
   savePurchaseEntry: (entry: PurchaseEntry) => Promise<void>;
+  cancelPurchaseEntry: (id: string) => Promise<void>;
+  restorePurchaseEntry: (id: string, previousStatus: PurchaseEntry['status']) => Promise<void>;
   deletePurchaseEntry: (id: string) => Promise<void>;
   saveSalesEntry: (entry: SalesEntry) => Promise<void>;
+  cancelSalesEntry: (id: string) => Promise<void>;
+  restoreSalesEntry: (id: string, previousStatus: SalesEntry['status']) => Promise<void>;
   deleteSalesEntry: (id: string) => Promise<void>;
   saveVendor: (vendor: Vendor) => Promise<void>;
   deleteVendor: (id: string) => Promise<void>;
@@ -146,9 +150,9 @@ export const AccountingProvider: React.FC<{ children: React.ReactNode, session: 
           },
           task_queue: taskQueue,
           reports_snapshot: {
-            sales_total: (sales || []).reduce((sum: number, s: any) => sum + (s.net_bill || 0), 0),
-            purchase_total: (purchases || []).reduce((sum: number, p: any) => sum + (p.net_bill || 0), 0),
-            gst_payable: (sales || []).reduce((sum: number, s: any) => sum + (s.gst_amount || 0), 0) - (purchases || []).reduce((sum: number, p: any) => sum + (p.gst_amount || 0), 0),
+            sales_total: (sales || []).filter((s: any) => s.status !== 'Canceled').reduce((sum: number, s: any) => sum + (s.net_bill || 0), 0),
+            purchase_total: (purchases || []).filter((p: any) => p.status !== 'Canceled').reduce((sum: number, p: any) => sum + (p.net_bill || 0), 0),
+            gst_payable: (sales || []).filter((s: any) => s.status !== 'Canceled').reduce((sum: number, s: any) => sum + (s.gst_amount || 0), 0) - (purchases || []).filter((p: any) => p.status !== 'Canceled').reduce((sum: number, p: any) => sum + (p.gst_amount || 0), 0),
             stock_value: (inventory || []).reduce((sum: number, i: any) => sum + (i.quantity * 100), 0)
           }
         });
@@ -206,6 +210,28 @@ export const AccountingProvider: React.FC<{ children: React.ReactNode, session: 
     });
   };
 
+  const cancelPurchaseEntry = async (id: string) => {
+    setCompany(prev => ({
+      ...prev,
+      modules: {
+        ...prev.modules,
+        purchase: prev.modules.purchase.map(e => e.id === id ? { ...e, status: 'Canceled' } : e)
+      }
+    }));
+    await supabase.from('purchase_entries').update({ status: 'Canceled' }).eq('id', id);
+  };
+
+  const restorePurchaseEntry = async (id: string, previousStatus: PurchaseEntry['status']) => {
+    setCompany(prev => ({
+      ...prev,
+      modules: {
+        ...prev.modules,
+        purchase: prev.modules.purchase.map(e => e.id === id ? { ...e, status: previousStatus } : e)
+      }
+    }));
+    await supabase.from('purchase_entries').update({ status: previousStatus }).eq('id', id);
+  };
+
   const deletePurchaseEntry = async (id: string) => {
     setCompany(prev => ({
       ...prev,
@@ -252,6 +278,28 @@ export const AccountingProvider: React.FC<{ children: React.ReactNode, session: 
       gst_enabled: entry.gstEnabled,
       payments: entry.payments
     });
+  };
+
+  const cancelSalesEntry = async (id: string) => {
+    setCompany(prev => ({
+      ...prev,
+      modules: {
+        ...prev.modules,
+        sales: prev.modules.sales.map(e => e.id === id ? { ...e, status: 'Canceled' } : e)
+      }
+    }));
+    await supabase.from('sales_entries').update({ status: 'Canceled' }).eq('id', id);
+  };
+
+  const restoreSalesEntry = async (id: string, previousStatus: SalesEntry['status']) => {
+    setCompany(prev => ({
+      ...prev,
+      modules: {
+        ...prev.modules,
+        sales: prev.modules.sales.map(e => e.id === id ? { ...e, status: previousStatus } : e)
+      }
+    }));
+    await supabase.from('sales_entries').update({ status: previousStatus }).eq('id', id);
   };
 
   const deleteSalesEntry = async (id: string) => {
@@ -512,8 +560,12 @@ export const AccountingProvider: React.FC<{ children: React.ReactNode, session: 
       ensureVendorExists,
       ensureCustomerExists,
       savePurchaseEntry,
+      cancelPurchaseEntry,
+      restorePurchaseEntry,
       deletePurchaseEntry,
       saveSalesEntry,
+      cancelSalesEntry,
+      restoreSalesEntry,
       deleteSalesEntry,
       saveVendor,
       deleteVendor,

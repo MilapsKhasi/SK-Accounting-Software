@@ -66,11 +66,11 @@ export const ReportsModule: React.FC = () => {
     switch (activeTab) {
       case 'sales':
         headers = ['Invoice No', 'Date', 'Customer', 'Taxable Value', 'GST', 'Status'];
-        data = company.modules.sales.map(s => [s.invoiceNumber, s.date, s.customer, s.discountedAmount.toFixed(2), s.gstAmount.toFixed(2), s.status]);
+        data = company.modules.sales.filter(s => s.status !== 'Canceled').map(s => [s.invoiceNumber, s.date, s.customer, s.discountedAmount.toFixed(2), s.gstAmount.toFixed(2), s.status]);
         break;
       case 'purchases':
         headers = ['Bill No', 'Date', 'Vendor', 'Taxable Value', 'GST', 'Status'];
-        data = company.modules.purchase.map(p => [p.billNumber, p.date, p.vendor, p.discountedAmount.toFixed(2), p.gstAmount.toFixed(2), p.status]);
+        data = company.modules.purchase.filter(p => p.status !== 'Canceled').map(p => [p.billNumber, p.date, p.vendor, p.discountedAmount.toFixed(2), p.gstAmount.toFixed(2), p.status]);
         break;
       case 'customers':
         headers = ['Name', 'GSTIN', 'Contact', 'Email', 'Phone'];
@@ -82,14 +82,14 @@ export const ReportsModule: React.FC = () => {
         break;
       case 'gstr1':
         headers = ['Invoice No', 'Date', 'Customer GSTIN', 'Taxable', 'CGST', 'SGST', 'Total GST'];
-        data = company.modules.sales.map(s => {
+        data = company.modules.sales.filter(s => s.status !== 'Canceled').map(s => {
           const customer = company.modules.customers.find(c => c.name === s.customer);
           return [s.invoiceNumber, s.date, customer?.gstin || 'N/A', s.discountedAmount.toFixed(2), s.cgst.toFixed(2), s.sgst.toFixed(2), s.gstAmount.toFixed(2)];
         });
         break;
       case 'gstr2a':
         headers = ['Vendor GSTIN', 'Bill No', 'Date', 'Vendor', 'Taxable', 'GST Paid'];
-        data = company.modules.purchase.map(p => {
+        data = company.modules.purchase.filter(p => p.status !== 'Canceled').map(p => {
           const vendor = company.modules.vendors.find(v => v.name === p.vendor);
           return [vendor?.gstin || 'N/A', p.billNumber, p.date, p.vendor, p.discountedAmount.toFixed(2), p.gstAmount.toFixed(2)];
         });
@@ -97,10 +97,10 @@ export const ReportsModule: React.FC = () => {
       case 'gstr3b':
         // Special handling for GSTR-3B summary
         headers = ['Particulars', 'Amount (₹)'];
-        const totalSales = company.modules.sales.reduce((sum, s) => sum + s.discountedAmount, 0);
-        const totalPurchases = company.modules.purchase.reduce((sum, p) => sum + p.discountedAmount, 0);
-        const outputGst = company.modules.sales.reduce((sum, s) => sum + s.gstAmount, 0);
-        const inputGst = company.modules.purchase.reduce((sum, p) => sum + p.gstAmount, 0);
+        const totalSales = company.modules.sales.filter(s => s.status !== 'Canceled').reduce((sum, s) => sum + s.discountedAmount, 0);
+        const totalPurchases = company.modules.purchase.filter(p => p.status !== 'Canceled').reduce((sum, p) => sum + p.discountedAmount, 0);
+        const outputGst = company.modules.sales.filter(s => s.status !== 'Canceled').reduce((sum, s) => sum + s.gstAmount, 0);
+        const inputGst = company.modules.purchase.filter(p => p.status !== 'Canceled').reduce((sum, p) => sum + p.gstAmount, 0);
         data = [
           ['Total Taxable Sales', totalSales.toFixed(2)],
           ['Total Taxable Purchases', totalPurchases.toFixed(2)],
@@ -129,7 +129,7 @@ export const ReportsModule: React.FC = () => {
 
     switch (activeTab) {
       case 'sales':
-        data = company.modules.sales.map(s => ({
+        data = company.modules.sales.filter(s => s.status !== 'Canceled').map(s => ({
           'Invoice No': s.invoiceNumber,
           'Date': s.date,
           'Customer': s.customer,
@@ -139,7 +139,7 @@ export const ReportsModule: React.FC = () => {
         }));
         break;
       case 'purchases':
-        data = company.modules.purchase.map(p => ({
+        data = company.modules.purchase.filter(p => p.status !== 'Canceled').map(p => ({
           'Bill No': p.billNumber,
           'Date': p.date,
           'Vendor': p.vendor,
@@ -215,10 +215,10 @@ export const ReportsModule: React.FC = () => {
   );
 
   const renderGstr3b = () => {
-    const totalSales = company.modules.sales.reduce((sum, s) => sum + s.discountedAmount, 0);
-    const totalPurchases = company.modules.purchase.reduce((sum, p) => sum + p.discountedAmount, 0);
-    const outputGst = company.modules.sales.reduce((sum, s) => sum + s.gstAmount, 0);
-    const inputGst = company.modules.purchase.reduce((sum, p) => sum + p.gstAmount, 0);
+    const totalSales = company.modules.sales.filter(s => s.status !== 'Canceled').reduce((sum, s) => sum + s.discountedAmount, 0);
+    const totalPurchases = company.modules.purchase.filter(p => p.status !== 'Canceled').reduce((sum, p) => sum + p.discountedAmount, 0);
+    const outputGst = company.modules.sales.filter(s => s.status !== 'Canceled').reduce((sum, s) => sum + s.gstAmount, 0);
+    const inputGst = company.modules.purchase.filter(p => p.status !== 'Canceled').reduce((sum, p) => sum + p.gstAmount, 0);
     const netPayable = outputGst - inputGst;
 
     return (
@@ -280,7 +280,7 @@ export const ReportsModule: React.FC = () => {
       case 'sales':
         return renderTable(
           ['Invoice No', 'Date', 'Customer', 'Taxable Value', 'GST Amount', 'Status'],
-          company.modules.sales.map(s => ({
+          company.modules.sales.filter(s => s.status !== 'Canceled').map(s => ({
             no: s.invoiceNumber,
             date: s.date,
             party: s.customer,
@@ -292,7 +292,7 @@ export const ReportsModule: React.FC = () => {
       case 'purchases':
         return renderTable(
           ['Bill No', 'Date', 'Vendor', 'Taxable Value', 'GST Amount', 'Status'],
-          company.modules.purchase.map(p => ({
+          company.modules.purchase.filter(p => p.status !== 'Canceled').map(p => ({
             no: p.billNumber,
             date: p.date,
             party: p.vendor,
@@ -328,7 +328,7 @@ export const ReportsModule: React.FC = () => {
       case 'gstr1':
         return renderTable(
           ['Invoice No', 'Date', 'Customer GSTIN', 'Taxable Value', 'CGST', 'SGST', 'Total GST'],
-          company.modules.sales.map(s => {
+          company.modules.sales.filter(s => s.status !== 'Canceled').map(s => {
             const customer = company.modules.customers.find(c => c.name === s.customer);
             return {
               no: s.invoiceNumber,
@@ -344,7 +344,7 @@ export const ReportsModule: React.FC = () => {
       case 'gstr2a':
         return renderTable(
           ['Vendor GSTIN', 'Bill No', 'Date', 'Vendor Name', 'Taxable Value', 'GST Paid'],
-          company.modules.purchase.map(p => {
+          company.modules.purchase.filter(p => p.status !== 'Canceled').map(p => {
             const vendor = company.modules.vendors.find(v => v.name === p.vendor);
             return {
               gstin: vendor?.gstin || 'N/A',

@@ -47,10 +47,10 @@ function DashboardContent({ session }: { session: Session }) {
     await supabase.auth.signOut();
   };
 
-  const totalSales = company.modules.sales.reduce((sum, s) => sum + s.netBill, 0);
-  const totalPurchases = company.modules.purchase.reduce((sum, p) => sum + p.netBill, 0);
-  const totalSalesGst = company.modules.sales.reduce((sum, s) => sum + s.gstAmount, 0);
-  const totalPurchaseGst = company.modules.purchase.reduce((sum, p) => sum + p.gstAmount, 0);
+  const totalSales = company.modules.sales.filter(s => s.status !== 'Canceled').reduce((sum, s) => sum + s.netBill, 0);
+  const totalPurchases = company.modules.purchase.filter(p => p.status !== 'Canceled').reduce((sum, p) => sum + p.netBill, 0);
+  const totalSalesGst = company.modules.sales.filter(s => s.status !== 'Canceled').reduce((sum, s) => sum + s.gstAmount, 0);
+  const totalPurchaseGst = company.modules.purchase.filter(p => p.status !== 'Canceled').reduce((sum, p) => sum + p.gstAmount, 0);
   const gstPayable = totalSalesGst - totalPurchaseGst;
 
   const navItems = [

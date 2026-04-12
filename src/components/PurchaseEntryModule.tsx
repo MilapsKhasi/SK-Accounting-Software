@@ -17,18 +17,21 @@ import {
   ToggleRight,
   ChevronDown,
   Edit2,
-  X
+  X,
+  Ban,
+  Undo2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export const PurchaseEntryModule: React.FC = () => {
-  const { company, ensureVendorExists, savePurchaseEntry, deletePurchaseEntry } = useAccounting();
+  const { company, ensureVendorExists, savePurchaseEntry, cancelPurchaseEntry, restorePurchaseEntry } = useAccounting();
   const [gstEnabled, setGstEnabled] = useState(true);
-  const [status, setStatus] = useState<'Pending' | 'Paid' | 'Partially Paid'>('Pending');
+  const [status, setStatus] = useState<'Pending' | 'Paid' | 'Partially Paid' | 'Canceled'>('Pending');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [payments, setPayments] = useState<any[]>([]);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [undoAction, setUndoAction] = useState<{ id: string; previousStatus: any } | null>(null);
   
   const [formData, setFormData] = useState({
     billNumber: 'PB-000',
@@ -150,12 +153,59 @@ export const PurchaseEntryModule: React.FC = () => {
     });
   };
 
-  const deleteEntry = async (id: string) => {
-    await deletePurchaseEntry(id);
+  const cancelEntry = async (id: string) => {
+    const entry = company.modules.purchase.find(e => e.id === id);
+    if (entry) {
+      const previousStatus = entry.status;
+      await cancelPurchaseEntry(id);
+      setUndoAction({ id, previousStatus });
+      // Auto-hide undo after 10 seconds
+      setTimeout(() => setUndoAction(null), 10000);
+    }
+  };
+
+  const handleUndo = async () => {
+    if (undoAction) {
+      await restorePurchaseEntry(undoAction.id, undoAction.previousStatus);
+      setUndoAction(null);
+    }
   };
 
   return (
     <div className="p-8 space-y-8 max-w-7xl mx-auto">
+      {/* Undo Notification */}
+      <AnimatePresence>
+        {undoAction && (
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-8 right-8 z-50 bg-gray-900 text-white p-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-gray-800"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-red-500/20 rounded-full flex items-center justify-center">
+                <Ban className="w-4 h-4 text-red-500" />
+              </div>
+              <p className="text-sm font-medium">Invoice deleted, Do you want to Undo changes?</p>
+            </div>
+            <div className="flex items-center gap-2 border-l border-gray-800 pl-4">
+              <button 
+                onClick={handleUndo}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-xs font-bold transition-colors"
+              >
+                <Undo2 className="w-3.5 h-3.5" /> Yes
+              </button>
+              <button 
+                onClick={() => setUndoAction(null)}
+                className="px-3 py-1.5 hover:bg-gray-800 rounded-lg text-xs font-bold transition-colors text-gray-400"
+              >
+                No
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <header className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Purchase Entry</h1>
@@ -188,6 +238,7 @@ export const PurchaseEntryModule: React.FC = () => {
               <option value="Pending">Pending</option>
               <option value="Partially Paid">Partially Paid</option>
               <option value="Paid">Paid</option>
+              <option value="Canceled">Canceled</option>
             </select>
           </div>
         </div>
@@ -546,7 +597,7 @@ export const PurchaseEntryModule: React.FC = () => {
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="p-6 border-b border-gray-50 flex justify-between items-center">
           <h2 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Purchase Bills Listing</h2>
-          <span className="text-xs text-gray-400 font-medium">{company.modules.purchase.length} Transactions</span>
+          <span className="text-xs text-gray-400 font-medium">{company.modules.purchase.filter(b => b.status !== 'Canceled').length} Transactions</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
@@ -565,7 +616,7 @@ export const PurchaseEntryModule: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-gray-50">
               <AnimatePresence>
-                {company.modules.purchase.map((bill) => (
+                {company.modules.purchase.filter(b => b.status !== 'Canceled').map((bill) => (
                   <motion.tr 
                     key={bill.id}
                     initial={{ opacity: 0 }}
@@ -599,17 +650,18 @@ export const PurchaseEntryModule: React.FC = () => {
                           <Edit2 className="w-4 h-4" />
                         </button>
                         <button 
-                          onClick={() => deleteEntry(bill.id)}
+                          onClick={() => cancelEntry(bill.id)}
                           className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                          title="Cancel Invoice"
                         >
-                          <Trash2 className="w-4 h-4" />
+                          <Ban className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
                   </motion.tr>
                 ))}
               </AnimatePresence>
-              {company.modules.purchase.length === 0 && (
+              {company.modules.purchase.filter(b => b.status !== 'Canceled').length === 0 && (
                 <tr>
                   <td colSpan={9} className="p-12 text-center text-gray-400 italic text-sm">
                     No purchase transactions recorded yet.

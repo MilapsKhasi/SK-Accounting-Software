@@ -27,7 +27,7 @@ export interface PurchaseEntry {
   cgst: number;
   sgst: number;
   netBill: number;
-  status: 'Pending' | 'Paid' | 'Partially Paid';
+  status: 'Pending' | 'Paid' | 'Partially Paid' | 'Canceled';
   gstEnabled: boolean;
   payments: Payment[];
 }
@@ -49,7 +49,7 @@ export interface SalesEntry {
   cgst: number;
   sgst: number;
   netBill: number;
-  status: 'Pending' | 'Paid' | 'Partially Paid';
+  status: 'Pending' | 'Paid' | 'Partially Paid' | 'Canceled';
   gstEnabled: boolean;
   payments: Payment[];
 }
