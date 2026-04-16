@@ -36,15 +36,19 @@ export function renderPurchase(container) {
                 <tr class="hover:bg-gray-50/50 transition-colors cursor-pointer group" data-id="${entry.id}">
                   <td class="px-6 py-4 font-mono text-sm font-bold text-gray-900">${entry.billNumber}</td>
                   <td class="px-6 py-4 text-sm text-gray-500">${entry.date}</td>
-                  <td class="px-6 py-4 text-sm font-medium text-gray-900">${entry.vendor}</td>
+                  <td class="px-6 py-4 text-sm font-medium text-gray-900">
+                    <button class="hover:text-indigo-600 hover:underline text-left" onclick="event.stopPropagation(); const v = state.company.modules.vendors.find(vend => vend.name === '${entry.vendor}'); if(v) window.navigateToLedger('vendor', v.id)">
+                      ${entry.vendor}
+                    </button>
+                  </td>
                   <td class="px-6 py-4 text-sm text-gray-500">${entry.itemName}</td>
                   <td class="px-6 py-4 text-sm text-gray-500 text-right">₹${entry.amount.toLocaleString()}</td>
                   <td class="px-6 py-4 text-sm font-bold text-gray-900 text-right">₹${entry.netBill.toLocaleString()}</td>
                   <td class="px-6 py-4">
                     <span class="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                      entry.status === 'Paid' ? 'bg-green-50 text-green-700' :
-                      entry.status === 'Pending' ? 'bg-yellow-50 text-yellow-700' :
-                      'bg-red-50 text-red-700'
+                       entry.status === 'Paid' ? 'bg-green-50 text-green-700' :
+                       entry.status === 'Pending' ? 'bg-yellow-50 text-yellow-700' :
+                       'bg-red-50 text-red-700'
                     }">
                       ${entry.status}
                     </span>
@@ -86,9 +90,25 @@ function openPurchaseModal(entry = null) {
   modal.classList.remove('hidden');
 
   const isEditing = !!entry;
-  const initialData = entry || {
+
+  // Helper to get next PB number
+  const getNextPB = () => {
+    const purchases = state.company.modules.purchase;
+    const nums = purchases.map(p => {
+      const match = p.billNumber?.match(/PB-(\d+)/);
+      return match ? parseInt(match[1]) : 0;
+    });
+    const max = nums.length > 0 ? Math.max(...nums) : 0;
+    return `PB-${String(max + 1).padStart(3, '0')}`;
+  };
+
+  // Load draft if not editing
+  const draftKey = 'draft_purchase_entry';
+  const draft = !isEditing ? JSON.parse(localStorage.getItem(draftKey)) : null;
+
+  const initialData = entry || draft || {
     id: crypto.randomUUID(),
-    billNumber: `BILL-${Date.now().toString().slice(-6)}`,
+    billNumber: getNextPB(),
     date: new Date().toISOString().split('T')[0],
     vendor: '',
     itemName: '',
@@ -108,153 +128,231 @@ function openPurchaseModal(entry = null) {
     payments: []
   };
 
-  modal.innerHTML = `
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-100">
-      <div class="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-        <h2 class="text-xl font-bold text-gray-900">${isEditing ? 'Edit' : 'New'} Purchase Entry</h2>
-        <button id="close-modal" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+  let currentPayments = [...(initialData.payments || [])];
+
+  const renderModalContent = () => {
+    modal.innerHTML = `
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-100">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
+          <h2 class="text-xl font-bold text-gray-900">${isEditing ? 'Edit' : 'New'} Purchase Entry</h2>
+          <button id="close-modal" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+        
+        <form id="purchase-form" class="p-8 space-y-8">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Bill Number</label>
+              <input name="billNumber" value="${initialData.billNumber}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold" />
+            </div>
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Date</label>
+              <input type="date" name="date" value="${initialData.date}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+            </div>
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Party Name</label>
+              <input name="vendor" value="${initialData.vendor}" list="vendors-list" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" required />
+              <datalist id="vendors-list">
+                ${state.company.modules.vendors.map(v => `<option value="${v.name}">`).join('')}
+              </datalist>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Without GST (₹)</label>
+              <input type="number" name="amount" value="${initialData.amount}" step="0.01" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" required />
+            </div>
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">GST (₹)</label>
+              <input type="number" name="gstAmount" value="${initialData.gstAmount}" step="0.01" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" required />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-2">
+              <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Status</label>
+              <select name="status" id="status-select" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                <option value="Pending" ${initialData.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                <option value="Partially" ${initialData.status === 'Partially' ? 'selected' : ''}>Partially</option>
+                <option value="Paid" ${initialData.status === 'Paid' ? 'selected' : ''}>Paid</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="payments-section" class="${initialData.status === 'Partially' ? '' : 'hidden'} space-y-4">
+            <div class="flex justify-between items-center">
+              <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest">Payments</h3>
+              <button type="button" id="add-payment-btn" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
+                <i data-lucide="plus" class="w-3 h-3"></i> New Payment
+              </button>
+            </div>
+            <div id="payments-list" class="space-y-3">
+              ${currentPayments.map((p, i) => `
+                <div class="flex gap-3 items-end bg-gray-50 p-3 rounded-xl border border-gray-100">
+                  <div class="flex-1 space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">Amount</label>
+                    <input type="number" data-payment-index="${i}" data-field="amount" value="${p.amount}" class="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm" />
+                  </div>
+                  <div class="flex-1 space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">Method</label>
+                    <select data-payment-index="${i}" data-field="method" class="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm">
+                      <option value="Cash" ${p.method === 'Cash' ? 'selected' : ''}>Cash</option>
+                      <option value="Bank" ${p.method === 'Bank' ? 'selected' : ''}>Bank</option>
+                      <option value="UPI" ${p.method === 'UPI' ? 'selected' : ''}>UPI</option>
+                      <option value="Cheque" ${p.method === 'Cheque' ? 'selected' : ''}>Cheque</option>
+                    </select>
+                  </div>
+                  <div class="flex-1 space-y-1">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase">Date</label>
+                    <input type="date" data-payment-index="${i}" data-field="date" value="${p.date || initialData.date}" class="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm" />
+                  </div>
+                  <button type="button" data-remove-payment="${i}" class="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <div class="bg-gray-50 p-6 rounded-2xl space-y-4">
+            <div class="flex justify-between items-center">
+              <span class="text-gray-900 font-bold">Grand Total</span>
+              <span id="display-net" class="text-2xl font-black text-indigo-600">₹0.00</span>
+            </div>
+            <div id="balance-row" class="flex justify-between items-center pt-2 border-t border-dashed border-gray-300">
+              <span class="text-gray-500 font-medium text-sm">Balance Due</span>
+              <span id="display-balance" class="font-bold text-red-600">₹0.00</span>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-4">
+            <button type="button" id="cancel-modal" class="px-6 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-colors">Cancel</button>
+            <button type="submit" class="px-8 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">Save Bill</button>
+          </div>
+        </form>
       </div>
-      
-      <form id="purchase-form" class="p-8 space-y-8">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Bill Number</label>
-            <input name="billNumber" value="${initialData.billNumber}" class="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-mono font-bold" readonly />
-          </div>
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Date</label>
-            <input type="date" name="date" value="${initialData.date}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
-          </div>
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Vendor</label>
-            <input name="vendor" value="${initialData.vendor}" list="vendors-list" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" required />
-            <datalist id="vendors-list">
-              ${state.company.modules.vendors.map(v => `<option value="${v.name}">`).join('')}
-            </datalist>
-          </div>
-        </div>
+    `;
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Item Name</label>
-            <input name="itemName" value="${initialData.itemName}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" required />
-          </div>
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">HSN Code</label>
-            <input name="hsnCode" value="${initialData.hsnCode}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Rate (₹)</label>
-            <input type="number" name="rate" value="${initialData.rate}" step="0.01" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" required />
-          </div>
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Quantity</label>
-            <input type="number" name="qty" value="${initialData.qty}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" required />
-          </div>
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Discount (%)</label>
-            <input type="number" name="discountPercent" value="${initialData.discountPercent}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
-          </div>
-          <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">GST (%)</label>
-            <select name="gstPercent" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
-              <option value="0" ${initialData.gstPercent === 0 ? 'selected' : ''}>0%</option>
-              <option value="5" ${initialData.gstPercent === 5 ? 'selected' : ''}>5%</option>
-              <option value="12" ${initialData.gstPercent === 12 ? 'selected' : ''}>12%</option>
-              <option value="18" ${initialData.gstPercent === 18 ? 'selected' : ''}>18%</option>
-              <option value="28" ${initialData.gstPercent === 28 ? 'selected' : ''}>28%</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="bg-gray-50 p-6 rounded-2xl space-y-4">
-          <div class="flex justify-between items-center text-sm">
-            <span class="text-gray-500 font-medium">Gross Amount</span>
-            <span id="display-amount" class="font-bold text-gray-900">₹0.00</span>
-          </div>
-          <div class="flex justify-between items-center text-sm">
-            <span class="text-gray-500 font-medium">Discounted Amount</span>
-            <span id="display-discounted" class="font-bold text-gray-900">₹0.00</span>
-          </div>
-          <div class="flex justify-between items-center text-sm">
-            <span class="text-gray-500 font-medium">GST Amount</span>
-            <span id="display-gst" class="font-bold text-gray-900">₹0.00</span>
-          </div>
-          <div class="h-[1px] bg-gray-200 my-2"></div>
-          <div class="flex justify-between items-center">
-            <span class="text-gray-900 font-bold">Net Bill Value</span>
-            <span id="display-net" class="text-2xl font-black text-indigo-600">₹0.00</span>
-          </div>
-        </div>
-
-        <div class="flex justify-end gap-3 pt-4">
-          <button type="button" id="cancel-modal" class="px-6 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-colors">Cancel</button>
-          <button type="submit" class="px-8 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">Save Bill</button>
-        </div>
-      </form>
-    </div>
-  `;
-
-  window.renderIcons();
-
-  const form = document.getElementById('purchase-form');
-  
-  const calculate = () => {
-    const rate = parseFloat(form.rate.value) || 0;
-    const qty = parseFloat(form.qty.value) || 0;
-    const discountPercent = parseFloat(form.discountPercent.value) || 0;
-    const gstPercent = parseFloat(form.gstPercent.value) || 0;
-
-    const amount = rate * qty;
-    const discountedAmount = amount - (amount * (discountPercent / 100));
-    const gstAmount = discountedAmount * (gstPercent / 100);
-    const netBill = discountedAmount + gstAmount;
-
-    document.getElementById('display-amount').innerText = `₹${amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-    document.getElementById('display-discounted').innerText = `₹${discountedAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-    document.getElementById('display-gst').innerText = `₹${gstAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-    document.getElementById('display-net').innerText = `₹${netBill.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
-
-    return { amount, discountedAmount, gstAmount, netBill };
+    window.renderIcons();
+    attachModalListeners();
   };
 
-  form.oninput = calculate;
-  calculate();
-
-  form.onsubmit = async (e) => {
-    e.preventDefault();
-    const { amount, discountedAmount, gstAmount, netBill } = calculate();
+  const attachModalListeners = () => {
+    const form = document.getElementById('purchase-form');
+    const statusSelect = document.getElementById('status-select');
+    const paymentsSection = document.getElementById('payments-section');
     
-    const entryData = {
-      ...initialData,
-      date: form.date.value,
-      vendor: form.vendor.value,
-      itemName: form.itemName.value,
-      hsnCode: form.hsnCode.value,
-      rate: parseFloat(form.rate.value),
-      qty: parseFloat(form.qty.value),
-      discountPercent: parseFloat(form.discountPercent.value),
-      gstPercent: parseFloat(form.gstPercent.value),
-      amount,
-      discountedAmount,
-      gstAmount,
-      cgst: gstAmount / 2,
-      sgst: gstAmount / 2,
-      netBill,
-      status: 'Pending'
+    const calculate = () => {
+      const amount = parseFloat(form.amount.value) || 0;
+      const gstAmount = parseFloat(form.gstAmount.value) || 0;
+      const netBill = amount + gstAmount;
+
+      const totalPaid = currentPayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+      const balance = netBill - totalPaid;
+
+      document.getElementById('display-net').innerText = `₹${netBill.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+      document.getElementById('display-balance').innerText = `₹${balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+
+      const addPaymentBtn = document.getElementById('add-payment-btn');
+      if (addPaymentBtn) {
+        if (balance <= 0) {
+          addPaymentBtn.disabled = true;
+          addPaymentBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+          addPaymentBtn.disabled = false;
+          addPaymentBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+      }
+
+      return { amount, gstAmount, netBill, balance };
     };
 
-    await savePurchaseEntry(entryData);
-    modal.classList.add('hidden');
+    form.oninput = (e) => {
+      if (e.target.dataset.paymentIndex !== undefined) {
+        const idx = parseInt(e.target.dataset.paymentIndex);
+        const field = e.target.dataset.field;
+        currentPayments[idx][field] = e.target.value;
+      }
+      const { amount, gstAmount, netBill, balance } = calculate();
+
+      // Save draft
+      if (!isEditing) {
+        const draftData = {
+          ...initialData,
+          billNumber: form.billNumber.value,
+          date: form.date.value,
+          vendor: form.vendor.value,
+          amount,
+          gstAmount,
+          netBill,
+          status: statusSelect.value,
+          payments: currentPayments
+        };
+        localStorage.setItem(draftKey, JSON.stringify(draftData));
+      }
+    };
+
+    statusSelect.onchange = (e) => {
+      const status = e.target.value;
+      if (status === 'Partially') {
+        paymentsSection.classList.remove('hidden');
+      } else if (status === 'Paid') {
+        paymentsSection.classList.add('hidden');
+        const { netBill } = calculate();
+        currentPayments = [{ amount: netBill, date: form.date.value, method: 'Cash' }];
+      } else {
+        paymentsSection.classList.add('hidden');
+        currentPayments = [];
+      }
+      calculate();
+    };
+
+    document.getElementById('add-payment-btn').onclick = () => {
+      const { balance } = calculate();
+      if (balance > 0) {
+        currentPayments.push({ amount: balance, date: form.date.value, method: 'Cash' });
+        renderModalContent();
+      }
+    };
+
+    document.querySelectorAll('[data-remove-payment]').forEach(btn => {
+      btn.onclick = () => {
+        const idx = parseInt(btn.dataset.removePayment);
+        currentPayments.splice(idx, 1);
+        renderModalContent();
+      };
+    });
+
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      const { amount, gstAmount, netBill } = calculate();
+      
+      const entryData = {
+        ...initialData,
+        billNumber: form.billNumber.value,
+        date: form.date.value,
+        vendor: form.vendor.value,
+        amount,
+        gstAmount,
+        netBill,
+        status: statusSelect.value,
+        payments: currentPayments
+      };
+
+      await savePurchaseEntry(entryData);
+      if (!isEditing) localStorage.removeItem(draftKey);
+      modal.classList.add('hidden');
+    };
+
+    document.getElementById('close-modal').onclick = () => modal.classList.add('hidden');
+    document.getElementById('cancel-modal').onclick = () => modal.classList.add('hidden');
+    
+    calculate();
   };
 
-  document.getElementById('close-modal').onclick = () => modal.classList.add('hidden');
-  document.getElementById('cancel-modal').onclick = () => modal.classList.add('hidden');
+  renderModalContent();
 }
 
 window.deletePurchase = async (id) => {

@@ -2,6 +2,12 @@ import { state, subscribe, setupSubscriptions, cleanupSubscriptions } from './st
 import { supabase } from './lib/supabase';
 import { renderSales } from './sales';
 import { renderPurchase } from './purchase';
+import { renderVendors } from './vendors';
+import { renderCustomers } from './customers';
+import { renderInventory } from './inventory';
+import { renderGSTSummary } from './gst-summary';
+import { renderReports } from './reports';
+import { renderLedger } from './ledger';
 
 let activeTab = 'dashboard';
 let isSidebarOpen = true;
@@ -41,6 +47,7 @@ function updateUI(container) {
     { id: 'customers', label: 'Customer Master', icon: 'users' },
     { id: 'gst-summary', label: 'GST Summary', icon: 'file-text' },
     { id: 'reports', label: 'Reports', icon: 'bar-chart-3' },
+    { id: 'ledger', label: 'Party Ledger', icon: 'book-open' },
     { id: 'system', label: 'System Info', icon: 'info' },
   ];
 
@@ -123,22 +130,45 @@ function updateUI(container) {
     updateUI(container);
   };
 
-  // If active tab has its own initialization, call it here
-  if (activeTab === 'sales') {
-    renderSales(document.getElementById('sales-container'));
-  } else if (activeTab === 'purchase') {
-    renderPurchase(document.getElementById('purchase-container'));
+  // Module Initializations
+  const moduleContainers = {
+    'sales': renderSales,
+    'purchase': renderPurchase,
+    'vendors': renderVendors,
+    'customers': renderCustomers,
+    'inventory': renderInventory,
+    'gst-summary': renderGSTSummary,
+    'reports': renderReports,
+    'ledger': renderLedger
+  };
+
+  if (moduleContainers[activeTab]) {
+    moduleContainers[activeTab](document.getElementById(`${activeTab}-container`));
   }
 }
+
+window.navigateToLedger = (partyType, partyId) => {
+  activeTab = 'ledger';
+  // We need to pass the selected party to the ledger module.
+  // Since we're using a simple updateUI, we can store these in a temporary global or state.
+  window.ledgerSelection = { partyType, partyId };
+  const container = document.querySelector('main').parentElement;
+  updateUI(container);
+};
 
 function renderActiveTab() {
   switch (activeTab) {
     case 'dashboard':
       return renderDashboardView();
     case 'sales':
-      return '<div id="sales-container"></div>';
     case 'purchase':
-      return '<div id="purchase-container"></div>';
+    case 'vendors':
+    case 'customers':
+    case 'inventory':
+    case 'gst-summary':
+    case 'reports':
+    case 'ledger':
+      return `<div id="${activeTab}-container"></div>`;
     case 'system':
       return renderSystemInfo();
     default:

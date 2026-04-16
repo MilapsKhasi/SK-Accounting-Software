@@ -4,6 +4,31 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SK Accounting</title>
+    <script>
+      // Prevent polyfills from trying to overwrite fetch if it's read-only
+      (function() {
+        try {
+          const desc = Object.getOwnPropertyDescriptor(window, 'fetch') || Object.getOwnPropertyDescriptor(Object.getPrototypeOf(window), 'fetch');
+          if (desc && !desc.configurable && !desc.writable && !desc.set) {
+            console.log('window.fetch is already read-only, skipping protection');
+            return;
+          }
+          const nativeFetch = window.fetch;
+          Object.defineProperty(window, 'fetch', {
+            get: function() { return nativeFetch; },
+            set: function(val) {
+              console.warn('Attempted to overwrite window.fetch. Stack trace:', new Error().stack);
+              // We ignore the set operation to keep the native fetch
+            },
+            configurable: true,
+            enumerable: true
+          });
+          console.log('window.fetch protection (with debug setter) active');
+        } catch (e) {
+          console.warn('window.fetch protection notice:', e.message);
+        }
+      })();
+    </script>
   </head>
   <body class="bg-[#F9FAFB] text-gray-900 font-sans">
     <div id="app"></div>

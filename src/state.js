@@ -42,10 +42,13 @@ export function notify() {
   state.listeners.forEach(l => l(state));
 }
 
-export async function initData() {
+export async function initData(silent = false) {
   if (!state.session?.user?.id) return;
-  state.loading = true;
-  notify();
+  
+  if (!silent) {
+    state.loading = true;
+    notify();
+  }
 
   try {
     const [
@@ -148,12 +151,12 @@ export function setupSubscriptions() {
   cleanupSubscriptions();
 
   subscriptionChannels = [
-    supabase.channel('sales_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'sales_entries' }, () => initData()),
-    supabase.channel('purchase_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'purchase_entries' }, () => initData()),
-    supabase.channel('inventory_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => initData()),
-    supabase.channel('vendor_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'vendors' }, () => initData()),
-    supabase.channel('customer_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'customers' }, () => initData()),
-    supabase.channel('profile_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => initData()),
+    supabase.channel('sales_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'sales_entries' }, () => initData(true)),
+    supabase.channel('purchase_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'purchase_entries' }, () => initData(true)),
+    supabase.channel('inventory_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => initData(true)),
+    supabase.channel('vendor_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'vendors' }, () => initData(true)),
+    supabase.channel('customer_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'customers' }, () => initData(true)),
+    supabase.channel('profile_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => initData(true)),
   ];
 
   subscriptionChannels.forEach(channel => channel.subscribe());
@@ -165,6 +168,30 @@ export function cleanupSubscriptions() {
 }
 
 export async function saveSalesEntry(entry) {
+  // Optimistic update
+  const index = state.company.modules.sales.findIndex(s => s.id === entry.id);
+  if (index > -1) {
+    state.company.modules.sales[index] = entry;
+  } else {
+    state.company.modules.sales.unshift(entry);
+  }
+  notify();
+
+  // Auto-create customer if doesn't exist
+  const existingCustomer = state.company.modules.customers.find(c => c.name === entry.customer);
+  if (!existingCustomer && entry.customer) {
+    await saveCustomer({
+      id: crypto.randomUUID(),
+      name: entry.customer,
+      gstin: '',
+      contactPerson: '',
+      email: '',
+      phone: '',
+      address: '',
+      createdAt: new Date().toISOString()
+    });
+  }
+
   await supabase.from('sales_entries').upsert({
     id: entry.id,
     user_id: state.session.user.id,
@@ -190,14 +217,45 @@ export async function saveSalesEntry(entry) {
 }
 
 export async function cancelSalesEntry(id) {
+  const entry = state.company.modules.sales.find(s => s.id === id);
+  if (entry) {
+    entry.status = 'Canceled';
+    notify();
+  }
   await supabase.from('sales_entries').update({ status: 'Canceled' }).eq('id', id);
 }
 
 export async function deleteSalesEntry(id) {
+  state.company.modules.sales = state.company.modules.sales.filter(s => s.id !== id);
+  notify();
   await supabase.from('sales_entries').delete().eq('id', id);
 }
 
 export async function savePurchaseEntry(entry) {
+  // Optimistic update
+  const index = state.company.modules.purchase.findIndex(p => p.id === entry.id);
+  if (index > -1) {
+    state.company.modules.purchase[index] = entry;
+  } else {
+    state.company.modules.purchase.unshift(entry);
+  }
+  notify();
+
+  // Auto-create vendor if doesn't exist
+  const existingVendor = state.company.modules.vendors.find(v => v.name === entry.vendor);
+  if (!existingVendor && entry.vendor) {
+    await saveVendor({
+      id: crypto.randomUUID(),
+      name: entry.vendor,
+      gstin: '',
+      contactPerson: '',
+      email: '',
+      phone: '',
+      address: '',
+      createdAt: new Date().toISOString()
+    });
+  }
+
   await supabase.from('purchase_entries').upsert({
     id: entry.id,
     user_id: state.session.user.id,
@@ -223,14 +281,29 @@ export async function savePurchaseEntry(entry) {
 }
 
 export async function cancelPurchaseEntry(id) {
+  const entry = state.company.modules.purchase.find(p => p.id === id);
+  if (entry) {
+    entry.status = 'Canceled';
+    notify();
+  }
   await supabase.from('purchase_entries').update({ status: 'Canceled' }).eq('id', id);
 }
 
 export async function deletePurchaseEntry(id) {
+  state.company.modules.purchase = state.company.modules.purchase.filter(p => p.id !== id);
+  notify();
   await supabase.from('purchase_entries').delete().eq('id', id);
 }
 
 export async function saveVendor(vendor) {
+  const index = state.company.modules.vendors.findIndex(v => v.id === vendor.id);
+  if (index > -1) {
+    state.company.modules.vendors[index] = vendor;
+  } else {
+    state.company.modules.vendors.push(vendor);
+  }
+  notify();
+
   await supabase.from('vendors').upsert({
     id: vendor.id,
     user_id: state.session.user.id,
@@ -245,10 +318,20 @@ export async function saveVendor(vendor) {
 }
 
 export async function deleteVendor(id) {
+  state.company.modules.vendors = state.company.modules.vendors.filter(v => v.id !== id);
+  notify();
   await supabase.from('vendors').delete().eq('id', id);
 }
 
 export async function saveCustomer(customer) {
+  const index = state.company.modules.customers.findIndex(c => c.id === customer.id);
+  if (index > -1) {
+    state.company.modules.customers[index] = customer;
+  } else {
+    state.company.modules.customers.push(customer);
+  }
+  notify();
+
   await supabase.from('customers').upsert({
     id: customer.id,
     user_id: state.session.user.id,
@@ -263,5 +346,36 @@ export async function saveCustomer(customer) {
 }
 
 export async function deleteCustomer(id) {
+  state.company.modules.customers = state.company.modules.customers.filter(c => c.id !== id);
+  notify();
   await supabase.from('customers').delete().eq('id', id);
+}
+
+export async function saveInventory(item) {
+  const index = state.company.modules.inventory.findIndex(i => i.id === item.id);
+  if (index > -1) {
+    state.company.modules.inventory[index] = item;
+  } else {
+    state.company.modules.inventory.push(item);
+  }
+  notify();
+
+  await supabase.from('inventory').upsert({
+    id: item.id,
+    user_id: state.session.user.id,
+    name: item.name,
+    sku: item.sku,
+    hsn_code: item.hsnCode,
+    quantity: item.quantity,
+    unit: item.unit,
+    min_stock: item.minStock,
+    price: item.price,
+    category: item.category
+  });
+}
+
+export async function deleteInventory(id) {
+  state.company.modules.inventory = state.company.modules.inventory.filter(i => i.id !== id);
+  notify();
+  await supabase.from('inventory').delete().eq('id', id);
 }
