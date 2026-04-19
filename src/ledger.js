@@ -1,4 +1,6 @@
 import { state } from './state';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export function renderLedger(container) {
   const customers = state.company.modules.customers;
@@ -265,8 +267,201 @@ export function renderLedger(container) {
   };
 
   document.getElementById('print-ledger-btn').onclick = () => {
-    window.print();
+    const party = selectedPartyType === 'customer' 
+      ? customers.find(c => c.id === selectedPartyId)
+      : vendors.find(v => v.id === selectedPartyId);
+    
+    // Recalculate everything for the PDF
+    const entries = [];
+    if (party) {
+      if (selectedPartyType === 'customer') {
+        const sales = state.company.modules.sales.filter(s => s.customer === party.name && s.status !== 'Canceled');
+        sales.forEach(s => {
+          entries.push({
+            date: s.date,
+            particulars: `BILL NUMBER ${s.invoiceNumber}`,
+            debit: s.netBill,
+            credit: 0,
+            timestamp: new Date(s.date).getTime()
+          });
+          if (s.payments && Array.isArray(s.payments)) {
+            s.payments.forEach(p => {
+              entries.push({
+                date: p.date || s.date,
+                particulars: `PAYMENT RECEIVED OF BILL NUMBER ${s.invoiceNumber}${p.method ? ` (${p.method})` : ''}`,
+                debit: 0,
+                credit: p.amount,
+                timestamp: new Date(p.date || s.date).getTime() + 1
+              });
+            });
+          } else if (s.status === 'Paid') {
+            entries.push({
+              date: s.date,
+              particulars: `PAYMENT RECEIVED OF BILL NUMBER ${s.invoiceNumber}`,
+              debit: 0,
+              credit: s.netBill,
+              timestamp: new Date(s.date).getTime() + 1
+            });
+          }
+        });
+      } else {
+        const purchases = state.company.modules.purchase.filter(p => p.vendor === party.name && p.status !== 'Canceled');
+        purchases.forEach(p => {
+          entries.push({
+            date: p.date,
+            particulars: `BILL NUMBER ${p.billNumber}`,
+            debit: p.netBill,
+            credit: 0,
+            timestamp: new Date(p.date).getTime()
+          });
+          if (p.payments && Array.isArray(p.payments)) {
+            p.payments.forEach(pay => {
+              entries.push({
+                date: pay.date || p.date,
+                particulars: `PAYMENT MADE FOR BILL NUMBER ${p.billNumber}${pay.method ? ` (${pay.method})` : ''}`,
+                debit: 0,
+                credit: pay.amount,
+                timestamp: new Date(pay.date || p.date).getTime() + 1
+              });
+            });
+          } else if (p.status === 'Paid') {
+            entries.push({
+              date: p.date,
+              particulars: `PAYMENT MADE FOR BILL NUMBER ${p.billNumber}`,
+              debit: 0,
+              credit: p.netBill,
+              timestamp: new Date(p.date).getTime() + 1
+            });
+          }
+        });
+      }
+    }
+    entries.sort((a, b) => a.timestamp - b.timestamp);
+    const totalDebit = entries.reduce((sum, e) => sum + e.debit, 0);
+    const totalCredit = entries.reduce((sum, e) => sum + e.credit, 0);
+    const closingBalance = totalDebit - totalCredit;
+
+    generatePDF(party, entries, fromDate, toDate, totalDebit, totalCredit, closingBalance);
   };
+
+  function generatePDF(party, entries, from, to, tDebit, tCredit, balance) {
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 15;
+    const contentWidth = pageWidth - (margin * 2);
+
+    // Page Border
+    doc.setDrawColor(0);
+    doc.setLineWidth(0.5);
+    doc.rect(margin, margin, contentWidth, doc.internal.pageSize.getHeight() - (margin * 2));
+
+    // Header Box
+    doc.setLineWidth(0.5);
+    doc.rect(margin, margin, contentWidth, 20);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text(state.company.company_name.toUpperCase(), pageWidth / 2, margin + 13, { align: 'center' });
+
+    // Secondary line
+    doc.line(margin, margin + 20, margin + contentWidth, margin + 20);
+
+    // Info Section
+    doc.setFontSize(10);
+    const infoY = margin + 35;
+    
+    // Column 1
+    doc.setFont('helvetica', 'bold');
+    doc.text('LEDGER OF', margin + 5, infoY);
+    doc.setFont('helvetica', 'bold');
+    doc.text(party ? party.name.toUpperCase() : 'CUSTOMER', margin + 45, infoY);
+    doc.line(margin + 45, infoY + 2, margin + contentWidth / 2 - 5, infoY + 2);
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('GSTIN NUMBER', margin + 5, infoY + 10);
+    doc.setFont('helvetica', 'bold');
+    doc.text(party ? (party.gstin || 'N/A').toUpperCase() : 'GSTIN NUMBER', margin + 45, infoY + 10);
+    doc.line(margin + 45, infoY + 12, margin + contentWidth / 2 - 5, infoY + 12);
+
+    // Column 2
+    doc.setFont('helvetica', 'bold');
+    doc.text('FROM DATE', margin + contentWidth / 2 + 5, infoY);
+    doc.setFont('helvetica', 'bold');
+    doc.text(from, margin + contentWidth / 2 + 45, infoY);
+    doc.line(margin + contentWidth / 2 + 45, infoY + 2, margin + contentWidth - 5, infoY + 2);
+
+    doc.setFont('helvetica', 'bold');
+    doc.text('TO DATE', margin + contentWidth / 2 + 5, infoY + 10);
+    doc.setFont('helvetica', 'bold');
+    doc.text(to, margin + contentWidth / 2 + 45, infoY + 10);
+    doc.line(margin + contentWidth / 2 + 45, infoY + 12, margin + contentWidth - 5, infoY + 12);
+
+    // Table
+    autoTable(doc, {
+      startY: infoY + 20,
+      margin: { left: margin, right: margin },
+      head: [['SR NO', 'PARTICULARS', 'DEBIT', 'CREDIT']],
+      body: [
+        ...entries.map((e, i) => [
+          i + 1,
+          e.particulars.toUpperCase(),
+          e.debit > 0 ? e.debit.toFixed(2) : '',
+          e.credit > 0 ? e.credit.toFixed(2) : ''
+        ]),
+        // Add empty rows to match the reference look if needed
+        ...Array.from({ length: Math.max(0, 15 - entries.length) }).map(() => ['', '', '', ''])
+      ],
+      foot: [
+        [
+          { content: 'GRAND TOTAL', colSpan: 2, styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: tDebit.toFixed(2), styles: { halign: 'right', fontStyle: 'bold' } },
+          { content: tCredit.toFixed(2), styles: { halign: 'right', fontStyle: 'bold' } }
+        ],
+        [
+          { content: 'NET CLOSING BALANCE', colSpan: 3, styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: Math.abs(balance).toFixed(2), styles: { halign: 'right', fontStyle: 'bold' } }
+        ]
+      ],
+      theme: 'plain',
+      styles: {
+        font: 'helvetica',
+        fontSize: 10,
+        cellPadding: 3,
+        lineColor: [0, 0, 0],
+        lineWidth: 0.2,
+        textColor: [0, 0, 0],
+      },
+      headStyles: {
+        fontStyle: 'bolditalic',
+        fillColor: false,
+        textColor: [0, 0, 0],
+        lineWidth: 0.5,
+      },
+      columnStyles: {
+        0: { cellWidth: 20 },
+        2: { halign: 'right', cellWidth: 40 },
+        3: { halign: 'right', cellWidth: 40 },
+      },
+      tableLineColor: [0, 0, 0],
+      tableLineWidth: 0.5,
+      bodyStyles: {
+        fontStyle: 'bold',
+      },
+      footStyles: {
+        fillColor: false,
+        textColor: [0, 0, 0],
+        lineWidth: 0.5,
+      },
+      didParseCell: function(data) {
+        // Vertical line for SR NO etc
+        data.cell.styles.lineWidth = 0.5;
+        if (data.column.index === 3) {
+           data.cell.styles.borderWidth = { top: 0, right: 0.5, bottom: 0.5, left: 0 };
+        }
+      }
+    });
+
+    doc.save(`ledger_${party ? party.name.replace(/\s+/g, '_').toLowerCase() : 'report'}.pdf`);
+  }
 
   updateLedgerView();
 }
