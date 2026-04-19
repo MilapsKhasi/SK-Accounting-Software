@@ -108,7 +108,7 @@ export function renderLedger(container) {
     if (!ledgerContent) return;
 
     ledgerContent.innerHTML = `
-      <div class="bg-white border border-gray-200 shadow-2xl p-8 max-w-5xl mx-auto font-['Poppins'] text-gray-900 overflow-hidden" style="min-height: 297mm;">
+      <div class="bg-white border border-gray-400 p-8 max-w-5xl mx-auto font-['Poppins'] text-gray-900 overflow-hidden" style="min-height: 297mm;">
         
         <!-- Header Box -->
         <div class="border-2 border-black p-4 text-center mb-6">
@@ -197,35 +197,35 @@ export function renderLedger(container) {
           <p class="text-gray-500 mt-1">View detailed transaction history for customers and vendors</p>
         </div>
         <div class="flex gap-4">
-          <button id="print-ledger-btn" class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm font-medium">
+          <button id="print-ledger-btn" class="flex items-center gap-2 px-4 py-2 bg-[#1e2a38] text-white transition-colors text-xs font-bold uppercase tracking-widest">
             <i data-lucide="printer" class="w-4 h-4"></i> Print Ledger
           </button>
         </div>
       </header>
 
-      <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm space-y-6">
+      <div class="bg-white p-6 border border-gray-200 space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div class="space-y-2">
             <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Party Type</label>
-            <select id="party-type" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+            <select id="party-type" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold">
               <option value="customer">Customer</option>
               <option value="vendor">Vendor</option>
             </select>
           </div>
           <div class="space-y-2">
             <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Select Party</label>
-            <select id="party-select" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+            <select id="party-select" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold">
               <option value="">Choose a party...</option>
               ${customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
             </select>
           </div>
           <div class="space-y-2">
             <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">From Date</label>
-            <input type="date" id="from-date" value="2025-03-31" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+            <input type="date" id="from-date" value="2025-03-31" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
           </div>
           <div class="space-y-2">
             <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">To Date</label>
-            <input type="date" id="to-date" value="2026-04-01" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+            <input type="date" id="to-date" value="2026-04-01" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
           </div>
         </div>
       </div>

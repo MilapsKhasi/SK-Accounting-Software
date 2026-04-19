@@ -11,12 +11,12 @@ export function renderPurchase(container) {
           <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Purchase Invoices</h1>
           <p class="text-gray-500 mt-1">Manage your purchase entries and bills</p>
         </div>
-        <button id="new-purchase-btn" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm text-sm font-medium">
+        <button id="new-purchase-btn" class="flex items-center gap-2 px-4 py-2 bg-[#1e2a38] text-white hover:bg-[#2c3e50] transition-colors text-sm font-bold uppercase tracking-widest">
           <i data-lucide="plus" class="w-4 h-4"></i> New Purchase Entry
         </button>
       </header>
 
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="bg-white border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
@@ -37,7 +37,7 @@ export function renderPurchase(container) {
                   <td class="px-6 py-4 font-mono text-sm font-bold text-gray-900">${entry.billNumber}</td>
                   <td class="px-6 py-4 text-sm text-gray-500">${entry.date}</td>
                   <td class="px-6 py-4 text-sm font-medium text-gray-900">
-                    <button class="hover:text-indigo-600 hover:underline text-left" onclick="event.stopPropagation(); const v = state.company.modules.vendors.find(vend => vend.name === '${entry.vendor}'); if(v) window.navigateToLedger('vendor', v.id)">
+                    <button class="hover:text-[#1e2a38] hover:underline text-left font-bold" onclick="event.stopPropagation(); const v = state.company.modules.vendors.find(vend => vend.name === '${entry.vendor}'); if(v) window.navigateToLedger('vendor', v.id)">
                       ${entry.vendor}
                     </button>
                   </td>
@@ -132,10 +132,10 @@ function openPurchaseModal(entry = null) {
 
   const renderModalContent = () => {
     modal.innerHTML = `
-      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-100">
+      <div class="bg-white w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-200">
         <div class="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-          <h2 class="text-xl font-bold text-gray-900">${isEditing ? 'Edit' : 'New'} Purchase Entry</h2>
-          <button id="close-modal" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+          <h2 class="text-xl font-bold text-gray-900 uppercase tracking-tight">${isEditing ? 'Edit' : 'New'} Purchase Entry</h2>
+          <button id="close-modal" class="p-2 hover:bg-gray-100 transition-colors">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
@@ -144,15 +144,15 @@ function openPurchaseModal(entry = null) {
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div class="space-y-2">
               <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Bill Number</label>
-              <input name="billNumber" value="${initialData.billNumber}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-bold" />
+              <input name="billNumber" value="${initialData.billNumber}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
             </div>
             <div class="space-y-2">
               <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Date</label>
-              <input type="date" name="date" value="${initialData.date}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+              <input type="date" name="date" value="${initialData.date}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
             </div>
             <div class="space-y-2">
               <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Party Name</label>
-              <input name="vendor" value="${initialData.vendor}" list="vendors-list" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" required />
+              <input name="vendor" value="${initialData.vendor}" list="vendors-list" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" required />
               <datalist id="vendors-list">
                 ${state.company.modules.vendors.map(v => `<option value="${v.name}">`).join('')}
               </datalist>
@@ -162,18 +162,18 @@ function openPurchaseModal(entry = null) {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-2">
               <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Without GST (₹)</label>
-              <input type="number" name="amount" value="${initialData.amount}" step="0.01" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" required />
+              <input type="number" name="amount" value="${initialData.amount}" step="0.01" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" required />
             </div>
             <div class="space-y-2">
               <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">GST (₹)</label>
-              <input type="number" name="gstAmount" value="${initialData.gstAmount}" step="0.01" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" required />
+              <input type="number" name="gstAmount" value="${initialData.gstAmount}" step="0.01" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" required />
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-2">
               <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Status</label>
-              <select name="status" id="status-select" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+              <select name="status" id="status-select" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold">
                 <option value="Pending" ${initialData.status === 'Pending' ? 'selected' : ''}>Pending</option>
                 <option value="Partially" ${initialData.status === 'Partially' ? 'selected' : ''}>Partially</option>
                 <option value="Paid" ${initialData.status === 'Paid' ? 'selected' : ''}>Paid</option>
@@ -184,20 +184,20 @@ function openPurchaseModal(entry = null) {
           <div id="payments-section" class="${initialData.status === 'Partially' ? '' : 'hidden'} space-y-4">
             <div class="flex justify-between items-center">
               <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest">Payments</h3>
-              <button type="button" id="add-payment-btn" class="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1">
-                <i data-lucide="plus" class="w-3 h-3"></i> New Payment
+              <button type="button" id="add-payment-btn" class="text-[10px] font-bold text-[#1e2a38] hover:text-[#2c3e50] flex items-center gap-1 bg-[#ffcd00] px-3 py-1 uppercase tracking-widest">
+                <i data-lucide="plus" class="w-3 h-3"></i> Add Payment
               </button>
             </div>
             <div id="payments-list" class="space-y-3">
               ${currentPayments.map((p, i) => `
-                <div class="flex gap-3 items-end bg-gray-50 p-3 rounded-xl border border-gray-100">
+                <div class="flex gap-3 items-end bg-gray-50 p-4 border border-gray-200">
                   <div class="flex-1 space-y-1">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase">Amount</label>
-                    <input type="number" data-payment-index="${i}" data-field="amount" value="${p.amount}" class="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm" />
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Amount</label>
+                    <input type="number" data-payment-index="${i}" data-field="amount" value="${p.amount}" class="w-full px-3 py-2 border border-gray-100 font-bold" />
                   </div>
                   <div class="flex-1 space-y-1">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase">Method</label>
-                    <select data-payment-index="${i}" data-field="method" class="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm">
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Method</label>
+                    <select data-payment-index="${i}" data-field="method" class="w-full px-3 py-2 border border-gray-100 font-bold">
                       <option value="Cash" ${p.method === 'Cash' ? 'selected' : ''}>Cash</option>
                       <option value="Bank" ${p.method === 'Bank' ? 'selected' : ''}>Bank</option>
                       <option value="UPI" ${p.method === 'UPI' ? 'selected' : ''}>UPI</option>
@@ -205,10 +205,10 @@ function openPurchaseModal(entry = null) {
                     </select>
                   </div>
                   <div class="flex-1 space-y-1">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase">Date</label>
-                    <input type="date" data-payment-index="${i}" data-field="date" value="${p.date || initialData.date}" class="w-full px-3 py-1.5 border border-gray-200 rounded-lg text-sm" />
+                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Date</label>
+                    <input type="date" data-payment-index="${i}" data-field="date" value="${p.date || initialData.date}" class="w-full px-3 py-2 border border-gray-100 font-bold" />
                   </div>
-                  <button type="button" data-remove-payment="${i}" class="p-2 text-red-500 hover:bg-red-50 rounded-lg">
+                  <button type="button" data-remove-payment="${i}" class="p-2 text-[#f44336] hover:bg-red-50 transition-colors">
                     <i data-lucide="trash-2" class="w-4 h-4"></i>
                   </button>
                 </div>
@@ -216,23 +216,24 @@ function openPurchaseModal(entry = null) {
             </div>
           </div>
 
-          <div class="bg-gray-50 p-6 rounded-2xl space-y-4">
+          <div class="bg-gray-50 p-6 space-y-4 border border-gray-200">
             <div class="flex justify-between items-center">
-              <span class="text-gray-900 font-bold">Grand Total</span>
-              <span id="display-net" class="text-2xl font-black text-indigo-600">₹0.00</span>
+              <span class="text-gray-900 font-bold uppercase tracking-widest text-sm">Grand Total</span>
+              <span id="display-net" class="text-2xl font-black text-[#1e2a38]">₹0.00</span>
             </div>
             <div id="balance-row" class="flex justify-between items-center pt-2 border-t border-dashed border-gray-300">
-              <span class="text-gray-500 font-medium text-sm">Balance Due</span>
-              <span id="display-balance" class="font-bold text-red-600">₹0.00</span>
+              <span class="text-gray-500 font-bold text-[10px] uppercase tracking-widest">Balance Due</span>
+              <span id="display-balance" class="font-bold text-[#f44336]">₹0.00</span>
             </div>
           </div>
 
           <div class="flex justify-end gap-3 pt-4">
-            <button type="button" id="cancel-modal" class="px-6 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-colors">Cancel</button>
-            <button type="submit" class="px-8 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">Save Bill</button>
+            <button type="button" id="cancel-modal" class="px-6 py-2.5 text-xs font-bold text-gray-500 hover:bg-gray-50 transition-colors uppercase tracking-widest">Cancel</button>
+            <button type="submit" class="px-8 py-2.5 bg-[#1e2a38] text-white text-xs font-bold hover:bg-[#2c3e50] transition-all uppercase tracking-widest">Save Bill</button>
           </div>
         </form>
       </div>
+     </div>
     `;
 
     window.renderIcons();

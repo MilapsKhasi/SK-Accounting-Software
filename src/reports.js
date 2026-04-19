@@ -11,41 +11,41 @@ export function renderReports(container) {
       </header>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center space-y-4">
-          <div class="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center">
-            <i data-lucide="trending-up" class="w-8 h-8 text-green-600"></i>
+        <div class="bg-white p-8 border border-gray-200 flex flex-col items-center text-center space-y-4">
+          <div class="w-16 h-16 bg-[#ffcd00]/10 flex items-center justify-center">
+            <i data-lucide="trending-up" class="w-8 h-8 text-[#1e2a38]"></i>
           </div>
           <div>
-            <h3 class="font-bold text-gray-900">Sales Report</h3>
-            <p class="text-sm text-gray-500 mt-1">Summary of all sales transactions</p>
+            <h3 class="font-bold text-gray-900 uppercase tracking-widest text-sm">Sales Report</h3>
+            <p class="text-[10px] text-gray-500 mt-1 uppercase font-bold">Summary of all sales transactions</p>
           </div>
-          <button id="gen-sales-report" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
+          <button id="gen-sales-report" class="w-full py-2.5 bg-[#1e2a38] text-white font-bold text-xs hover:bg-[#2c3e50] transition-all uppercase tracking-widest">
             Generate PDF
           </button>
         </div>
 
-        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center space-y-4">
-          <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center">
-            <i data-lucide="shopping-cart" class="w-8 h-8 text-blue-600"></i>
+        <div class="bg-white p-8 border border-gray-200 flex flex-col items-center text-center space-y-4">
+          <div class="w-16 h-16 bg-[#ffcd00]/10 flex items-center justify-center">
+            <i data-lucide="shopping-cart" class="w-8 h-8 text-[#1e2a38]"></i>
           </div>
           <div>
-            <h3 class="font-bold text-gray-900">Purchase Report</h3>
-            <p class="text-sm text-gray-500 mt-1">Summary of all purchase transactions</p>
+            <h3 class="font-bold text-gray-900 uppercase tracking-widest text-sm">Purchase Report</h3>
+            <p class="text-[10px] text-gray-500 mt-1 uppercase font-bold">Summary of all purchase transactions</p>
           </div>
-          <button id="gen-purchase-report" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
+          <button id="gen-purchase-report" class="w-full py-2.5 bg-[#1e2a38] text-white font-bold text-xs hover:bg-[#2c3e50] transition-all uppercase tracking-widest">
             Generate PDF
           </button>
         </div>
 
-        <div class="bg-white p-8 rounded-2xl border border-gray-100 shadow-sm flex flex-col items-center text-center space-y-4">
-          <div class="w-16 h-16 bg-purple-50 rounded-full flex items-center justify-center">
-            <i data-lucide="package" class="w-8 h-8 text-purple-600"></i>
+        <div class="bg-white p-8 border border-gray-200 flex flex-col items-center text-center space-y-4">
+          <div class="w-16 h-16 bg-[#ffcd00]/10 flex items-center justify-center">
+            <i data-lucide="package" class="w-8 h-8 text-[#1e2a38]"></i>
           </div>
           <div>
-            <h3 class="font-bold text-gray-900">Inventory Report</h3>
-            <p class="text-sm text-gray-500 mt-1">Current stock levels and valuation</p>
+            <h3 class="font-bold text-gray-900 uppercase tracking-widest text-sm">Inventory Report</h3>
+            <p class="text-[10px] text-gray-500 mt-1 uppercase font-bold">Current stock levels and valuation</p>
           </div>
-          <button id="gen-inventory-report" class="w-full py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100">
+          <button id="gen-inventory-report" class="w-full py-2.5 bg-[#1e2a38] text-white font-bold text-xs hover:bg-[#2c3e50] transition-all uppercase tracking-widest">
             Generate PDF
           </button>
         </div>

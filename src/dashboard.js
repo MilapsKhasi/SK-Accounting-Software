@@ -30,7 +30,7 @@ function updateUI(container) {
     container.innerHTML = `
       <div class="min-h-screen bg-white flex items-center justify-center">
         <div class="flex flex-col items-center gap-4">
-          <div class="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          <div class="w-12 h-12 border-4 border-[#1e2a38] border-t-transparent animate-spin"></div>
           <p class="text-sm font-bold text-gray-500 uppercase tracking-widest">Loading SK Accounting...</p>
         </div>
       </div>
@@ -48,37 +48,36 @@ function updateUI(container) {
     { id: 'gst-summary', label: 'GST Summary', icon: 'file-text' },
     { id: 'reports', label: 'Reports', icon: 'bar-chart-3' },
     { id: 'ledger', label: 'Party Ledger', icon: 'book-open' },
-    { id: 'system', label: 'System Info', icon: 'info' },
   ];
 
   const { company } = state;
 
   container.innerHTML = `
-    <div class="min-h-screen bg-[#F9FAFB] flex font-sans text-gray-900">
+    <div class="min-h-screen bg-[#f8f9fb] flex font-sans text-gray-900">
       <!-- Sidebar -->
-      <aside id="sidebar" class="bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0 z-20 shadow-sm transition-all duration-300" style="width: ${isSidebarOpen ? '280px' : '80px'}">
-        <div class="p-6 flex items-center gap-3 border-b border-gray-50">
-          <div class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-indigo-200">
-            <i data-lucide="building-2" class="text-white w-6 h-6"></i>
+      <aside id="sidebar" class="bg-[#1e2a38] flex flex-col h-screen sticky top-0 z-20 transition-all duration-300" style="width: ${isSidebarOpen ? '280px' : '80px'}">
+        <div class="p-6 flex items-center gap-3 border-b border-white/10">
+          <div class="w-10 h-10 bg-[#ffcd00] flex items-center justify-center flex-shrink-0">
+            <i data-lucide="building-2" class="text-[#1e2a38] w-6 h-6"></i>
           </div>
-          <span class="font-bold text-lg tracking-tight truncate ${isSidebarOpen ? '' : 'hidden'}">SK Accounting</span>
+          <span class="font-bold text-lg tracking-tight truncate text-white ${isSidebarOpen ? '' : 'hidden'}">SK Accounting</span>
         </div>
 
-        <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
           ${navItems.map(item => `
-            <button data-tab="${item.id}" class="w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 ${activeTab === item.id ? 'bg-indigo-50 text-indigo-700 font-medium' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}">
+            <button data-tab="${item.id}" class="w-full flex items-center gap-3 p-3 transition-all duration-200 ${activeTab === item.id ? 'bg-[#ffcd00] text-[#1e2a38] font-bold' : 'text-gray-400 hover:bg-white/5 hover:text-white'}">
               <i data-lucide="${item.icon}" class="w-5 h-5 flex-shrink-0"></i>
               <span class="${isSidebarOpen ? '' : 'hidden'}">${item.label}</span>
             </button>
           `).join('')}
         </nav>
 
-        <div class="p-4 border-t border-gray-50 space-y-2">
-          <button id="logout-btn" class="w-full flex items-center gap-3 p-3 rounded-xl transition-all duration-200 text-red-500 hover:bg-red-50">
+        <div class="p-4 border-t border-white/10 space-y-1">
+          <button id="logout-btn" class="w-full flex items-center gap-3 p-3 transition-all duration-200 bg-[#f44336] text-white hover:bg-[#d32f2f]">
             <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i>
-            <span class="font-medium ${isSidebarOpen ? '' : 'hidden'}">Sign Out</span>
+            <span class="font-bold ${isSidebarOpen ? '' : 'hidden'}">Sign Out</span>
           </button>
-          <button id="toggle-sidebar" class="w-full flex items-center justify-center p-3 rounded-xl hover:bg-gray-50 text-gray-400 transition-colors">
+          <button id="toggle-sidebar" class="w-full flex items-center justify-center p-3 hover:bg-white/5 text-gray-400 transition-colors">
             <i data-lucide="${isSidebarOpen ? 'x' : 'menu'}" class="w-5 h-5"></i>
           </button>
         </div>
@@ -88,16 +87,16 @@ function updateUI(container) {
       <main class="flex-1 flex flex-col min-w-0">
         <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10">
           <div class="flex items-center gap-2">
-            <span class="text-sm font-medium text-gray-400 uppercase tracking-widest">Active Company</span>
+            <span class="text-xs font-medium text-gray-400 uppercase tracking-widest">Active Company</span>
             <div class="h-4 w-[1px] bg-gray-200 mx-2"></div>
             <span class="text-sm font-bold text-gray-900">${company.company_name}</span>
           </div>
           <div class="flex items-center gap-4">
             <div class="text-right hidden sm:block">
               <p class="text-xs font-bold text-gray-900 truncate max-w-[150px]">${state.session.user.email}</p>
-              <p class="text-[10px] font-bold text-indigo-600 uppercase tracking-wider">Active Session</p>
+              <p class="text-[10px] font-bold text-[#1e2a38] uppercase tracking-wider">Active Session</p>
             </div>
-            <div class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-700 font-bold text-xs border border-indigo-200">
+            <div class="w-8 h-8 bg-gray-100 flex items-center justify-center text-[#1e2a38] font-bold text-xs border border-gray-200">
               ${state.session.user.email?.substring(0, 2).toUpperCase()}
             </div>
           </div>
@@ -169,16 +168,14 @@ function renderActiveTab() {
     case 'reports':
     case 'ledger':
       return `<div id="${activeTab}-container"></div>`;
-    case 'system':
-      return renderSystemInfo();
     default:
       return `
         <div class="p-8 flex flex-col items-center justify-center h-[60vh] text-center">
-          <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+          <div class="w-16 h-16 bg-gray-100 flex items-center justify-center mb-4 border border-gray-200">
             <i data-lucide="settings" class="w-8 h-8 text-gray-400 animate-spin-slow"></i>
           </div>
-          <h2 class="text-xl font-semibold text-gray-900">Module Under Construction</h2>
-          <p class="text-gray-500 mt-2 max-w-xs">
+          <h2 class="text-xl font-bold text-gray-900 uppercase tracking-tight">Module Under Construction</h2>
+          <p class="text-gray-500 mt-2 max-w-xs text-[10px] font-bold uppercase tracking-widest">
             The module is currently being implemented.
           </p>
         </div>
@@ -202,16 +199,16 @@ function renderDashboardView() {
       <header class="flex justify-between items-end">
         <div>
           <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Dashboard</h1>
-          <p class="text-gray-500 mt-1">Real-time overview for ${company.company_name}</p>
+          <p class="text-gray-500 mt-1 uppercase text-[10px] font-bold tracking-widest">Real-time overview for ${company.company_name}</p>
         </div>
         <div class="flex gap-3">
-          <button class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm text-sm font-medium">
+          <button class="flex items-center gap-2 px-4 py-2 bg-[#1e2a38] text-white hover:bg-[#2c3e50] transition-colors text-xs font-bold uppercase tracking-widest">
             <i data-lucide="upload" class="w-4 h-4"></i> Upload Sales
           </button>
-          <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm font-medium">
+          <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-[#1e2a38] hover:bg-gray-50 transition-colors text-xs font-bold uppercase tracking-widest">
             <i data-lucide="upload" class="w-4 h-4"></i> Upload Purchase
           </button>
-          <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors shadow-sm text-sm font-medium">
+          <button class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-[#1e2a38] hover:bg-gray-50 transition-colors text-xs font-bold uppercase tracking-widest">
             <i data-lucide="file-text" class="w-4 h-4"></i> Generate Report
           </button>
         </div>
@@ -219,59 +216,17 @@ function renderDashboardView() {
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         ${stats.map(stat => `
-          <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+          <div class="bg-white p-6 border border-gray-200">
             <div class="flex justify-between items-start">
-              <div class="p-2 rounded-lg ${stat.bg}">
+              <div class="p-2 ${stat.bg}">
                 <i data-lucide="${stat.icon}" class="w-5 h-5 ${stat.color}"></i>
               </div>
-              <button class="text-xs font-medium text-indigo-600 hover:underline">View Details</button>
+              <button class="text-[10px] font-bold uppercase tracking-widest text-[#1e2a38] hover:underline">View Details</button>
             </div>
             <p class="text-2xl font-bold mt-4 text-gray-900">${stat.value}</p>
-            <p class="text-sm font-medium text-gray-500 mt-1">${stat.label}</p>
+            <p class="text-[10px] font-bold text-gray-400 mt-1 uppercase tracking-widest">${stat.label}</p>
           </div>
         `).join('')}
-      </div>
-    </div>
-  `;
-}
-
-function renderSystemInfo() {
-  const { company } = state;
-  return `
-    <div class="p-8">
-      <header class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">System Initialization</h1>
-        <p class="text-gray-500 mt-2">Initialized company object for ${company.company_name}.</p>
-      </header>
-      <div class="bg-gray-900 rounded-2xl p-6 overflow-hidden border border-gray-800 shadow-2xl">
-        <div class="flex items-center gap-2 mb-4">
-          <div class="w-3 h-3 rounded-full bg-red-500"></div>
-          <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
-          <div class="w-3 h-3 rounded-full bg-green-500"></div>
-          <span class="text-xs text-gray-500 font-mono ml-2">purchase_module_structure.json</span>
-        </div>
-        <pre class="text-green-400 font-mono text-sm overflow-x-auto">${JSON.stringify({
-          company: company.company_name,
-          module: "Purchase Entry",
-          form_fields: [
-            "Purchase Bill Number", "Date", "Vendor / Supplier", "Item Name", 
-            "HSN Code", "Rate", "QTY", "Amount", "Discount %", 
-            "Discounted Amount", "GST %", "Subtotal"
-          ],
-          totals_section: [
-            "Without GST", "GST Amount", "CGST", "SGST", "Net Bill"
-          ],
-          listing_columns: [
-            "Bill No", "Date", "Vendor", "Item", "Amount", "GST", "Net Bill", "Status"
-          ],
-          accounting_logic: {
-            amount: "Rate * Qty",
-            discounted_amount: "Amount - (Amount * Discount%)",
-            gst_amount: "Discounted Amount * GST%",
-            cgst_sgst: "GST Amount / 2",
-            net_bill: "Discounted Amount + GST Amount"
-          }
-        }, null, 2)}</pre>
       </div>
     </div>
   `;

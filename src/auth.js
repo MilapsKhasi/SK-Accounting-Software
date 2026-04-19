@@ -2,58 +2,58 @@ import { supabase } from './lib/supabase';
 
 export function renderAuth(container) {
   container.innerHTML = `
-    <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="min-h-screen bg-[#f8f9fb] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-['Poppins']">
       <div class="sm:mx-auto sm:w-full sm:max-w-md">
         <div class="flex justify-center">
-          <div class="w-12 h-12 bg-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
-            <i data-lucide="building-2" class="text-white w-8 h-8"></i>
+          <div class="w-16 h-16 bg-[#1e2a38] flex items-center justify-center">
+            <i data-lucide="building-2" class="text-[#ffcd00] w-10 h-10"></i>
           </div>
         </div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900 tracking-tight">
+        <h2 class="mt-6 text-center text-3xl font-black text-gray-900 tracking-tighter uppercase">
           SK Accounting
         </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
+        <p class="mt-2 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">
           Sign in to manage your business
         </p>
       </div>
 
       <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div class="bg-white py-8 px-4 shadow-xl shadow-gray-200/50 sm:rounded-2xl sm:px-10 border border-gray-100">
+        <div class="bg-white py-8 px-4 sm:px-10 border border-gray-200">
           <form id="auth-form" class="space-y-6">
             <div>
-              <label for="email" class="block text-sm font-medium text-gray-700">
+              <label for="email" class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                 Email address
               </label>
               <div class="mt-1">
                 <input id="email" name="email" type="email" required 
-                  class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
+                  class="appearance-none block w-full px-4 py-2 border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1e2a38] text-sm font-bold transition-all"
                   placeholder="you@example.com">
               </div>
             </div>
 
             <div>
-              <label for="password" class="block text-sm font-medium text-gray-700">
+              <label for="password" class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">
                 Password
               </label>
               <div class="mt-1">
                 <input id="password" name="password" type="password" required 
-                  class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all"
+                  class="appearance-none block w-full px-4 py-2 border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1e2a38] text-sm font-bold transition-all"
                   placeholder="••••••••">
               </div>
             </div>
 
-            <div id="auth-error" class="hidden p-3 rounded-lg bg-red-50 border border-red-100 flex items-center gap-2 text-red-600 text-sm">
+            <div id="auth-error" class="hidden p-3 bg-red-50 border border-red-200 flex items-center gap-2 text-[#f44336] text-[10px] font-bold uppercase tracking-widest">
               <i data-lucide="alert-circle" class="w-4 h-4"></i>
               <span id="error-message"></span>
             </div>
 
-            <div class="flex flex-col gap-3">
+            <div class="flex flex-col gap-3 pt-2">
               <button type="submit" id="signin-btn"
-                class="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
+                class="w-full flex justify-center py-3 px-4 text-xs font-bold text-white bg-[#1e2a38] hover:bg-[#2c3e50] focus:outline-none uppercase tracking-widest transition-all">
                 Sign In
               </button>
               <button type="button" id="signup-btn"
-                class="w-full flex justify-center py-2.5 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-bold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all">
+                class="w-full flex justify-center py-3 px-4 border border-gray-200 text-xs font-bold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none uppercase tracking-widest transition-all">
                 Create Account
               </button>
             </div>

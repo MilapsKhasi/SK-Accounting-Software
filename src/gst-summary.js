@@ -17,26 +17,26 @@ export function renderGSTSummary(container) {
       </header>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <p class="text-sm font-medium text-gray-500">Output GST (Sales)</p>
-          <p class="text-2xl font-bold mt-1 text-red-600">₹${salesGST.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+        <div class="bg-white p-6 border border-gray-200">
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Output GST (Sales)</p>
+          <p class="text-2xl font-bold mt-1 text-[#f44336]">₹${salesGST.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
         </div>
-        <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <p class="text-sm font-medium text-gray-500">Input GST (Purchase)</p>
+        <div class="bg-white p-6 border border-gray-200">
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Input GST (Purchase)</p>
           <p class="text-2xl font-bold mt-1 text-green-600">₹${purchaseGST.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
         </div>
-        <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
-          <p class="text-sm font-medium text-gray-500">Net GST Payable</p>
-          <p class="text-2xl font-bold mt-1 ${netPayable >= 0 ? 'text-indigo-600' : 'text-green-600'}">
+        <div class="bg-white p-6 border border-gray-200">
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Net GST Payable</p>
+          <p class="text-2xl font-bold mt-1 ${netPayable >= 0 ? 'text-[#1e2a38]' : 'text-green-600'}">
             ₹${Math.abs(netPayable).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-            <span class="text-xs font-normal text-gray-400 ml-1">${netPayable >= 0 ? '(Payable)' : '(Credit)'}</span>
+            <span class="text-xs font-normal text-gray-400 ml-1 font-bold italic">${netPayable >= 0 ? '(Payable)' : '(Credit)'}</span>
           </p>
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <div class="p-6 border-b border-gray-100">
-          <h3 class="font-bold text-gray-900">GST Breakdown by Rate</h3>
+      <div class="bg-white border border-gray-200 overflow-hidden">
+        <div class="p-6 border-b border-gray-200">
+          <h3 class="font-bold text-gray-900 uppercase tracking-widest text-sm">GST Breakdown by Rate</h3>
         </div>
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">

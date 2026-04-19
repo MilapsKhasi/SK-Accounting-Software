@@ -10,12 +10,12 @@ export function renderVendors(container) {
           <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Vendor Master</h1>
           <p class="text-gray-500 mt-1">Manage your suppliers and vendors</p>
         </div>
-        <button id="new-vendor-btn" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm text-sm font-medium">
+        <button id="new-vendor-btn" class="flex items-center gap-2 px-4 py-2 bg-[#1e2a38] text-white hover:bg-[#2c3e50] transition-colors text-xs font-bold uppercase tracking-widest">
           <i data-lucide="plus" class="w-4 h-4"></i> Add New Vendor
         </button>
       </header>
 
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div class="bg-white border border-gray-200 overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse">
             <thead>
@@ -36,10 +36,10 @@ export function renderVendors(container) {
                   <td class="px-6 py-4 text-sm text-gray-500">${vendor.phone || 'N/A'}</td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button class="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="View Ledger" onclick="event.stopPropagation(); window.navigateToLedger('vendor', '${vendor.id}')">
+                      <button class="p-1.5 text-gray-400 hover:text-[#1e2a38] hover:bg-gray-100 transition-colors" title="View Ledger" onclick="event.stopPropagation(); window.navigateToLedger('vendor', '${vendor.id}')">
                         <i data-lucide="book-open" class="w-4 h-4"></i>
                       </button>
-                      <button class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" onclick="event.stopPropagation(); window.deleteVendor('${vendor.id}')">
+                      <button class="p-1.5 text-gray-400 hover:text-[#f44336] hover:bg-red-50 transition-colors" onclick="event.stopPropagation(); window.deleteVendor('${vendor.id}')">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                       </button>
                     </div>
@@ -90,10 +90,10 @@ function openVendorModal(vendor = null) {
   };
 
   modal.innerHTML = `
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-100">
+    <div class="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200">
       <div class="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-        <h2 class="text-xl font-bold text-gray-900">${isEditing ? 'Edit' : 'Add'} Vendor</h2>
-        <button id="close-modal" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+        <h2 class="text-xl font-bold text-gray-900 uppercase tracking-tight">${isEditing ? 'Edit' : 'Add'} Vendor</h2>
+        <button id="close-modal" class="p-2 hover:bg-gray-100 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
@@ -101,39 +101,39 @@ function openVendorModal(vendor = null) {
       <form id="vendor-form" class="p-8 space-y-6">
         <div class="space-y-2">
           <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Vendor Name</label>
-          <input name="name" value="${initialData.name}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" required />
+          <input name="name" value="${initialData.name}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" required />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-2">
             <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">GSTIN</label>
-            <input name="gstin" value="${initialData.gstin}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-mono" />
+            <input name="gstin" value="${initialData.gstin}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-mono font-bold" />
           </div>
           <div class="space-y-2">
             <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Contact Person</label>
-            <input name="contactPerson" value="${initialData.contactPerson}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+            <input name="contactPerson" value="${initialData.contactPerson}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-2">
             <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Email</label>
-            <input type="email" name="email" value="${initialData.email}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+            <input type="email" name="email" value="${initialData.email}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
           </div>
           <div class="space-y-2">
             <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Phone</label>
-            <input name="phone" value="${initialData.phone}" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" />
+            <input name="phone" value="${initialData.phone}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
           </div>
         </div>
 
         <div class="space-y-2">
           <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Address</label>
-          <textarea name="address" rows="3" class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all">${initialData.address}</textarea>
+          <textarea name="address" rows="3" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold">${initialData.address}</textarea>
         </div>
 
         <div class="flex justify-end gap-3 pt-4">
-          <button type="button" id="cancel-modal" class="px-6 py-2.5 text-sm font-bold text-gray-500 hover:bg-gray-50 rounded-xl transition-colors">Cancel</button>
-          <button type="submit" class="px-8 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all">Save Vendor</button>
+          <button type="button" id="cancel-modal" class="px-6 py-2.5 text-xs font-bold text-gray-500 hover:bg-gray-50 transition-colors uppercase tracking-widest">Cancel</button>
+          <button type="submit" class="px-8 py-2.5 bg-[#1e2a38] text-white text-xs font-bold hover:bg-[#2c3e50] transition-all uppercase tracking-widest">Save Vendor</button>
         </div>
       </form>
     </div>
