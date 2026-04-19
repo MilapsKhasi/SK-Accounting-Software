@@ -57,8 +57,8 @@ function updateUI(container) {
       <!-- Sidebar -->
       <aside id="sidebar" class="bg-[#1e2a38] flex flex-col h-screen sticky top-0 z-20 transition-all duration-300" style="width: ${isSidebarOpen ? '280px' : '80px'}">
         <div class="p-6 flex items-center gap-3 border-b border-white/10">
-          <div class="w-10 h-10 bg-[#ffcd00] flex items-center justify-center flex-shrink-0">
-            <i data-lucide="building-2" class="text-[#1e2a38] w-6 h-6"></i>
+          <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
+            <img src="/logo.svg" alt="Logo" class="w-full h-full object-contain" referrerPolicy="no-referrer" />
           </div>
           <span class="font-bold text-lg tracking-tight truncate text-white ${isSidebarOpen ? '' : 'hidden'}">SK Accounting</span>
         </div>

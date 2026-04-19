@@ -5,8 +5,8 @@ export function renderAuth(container) {
     <div class="min-h-screen bg-[#f8f9fb] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-['Poppins']">
       <div class="sm:mx-auto sm:w-full sm:max-w-md">
         <div class="flex justify-center">
-          <div class="w-16 h-16 bg-[#1e2a38] flex items-center justify-center">
-            <i data-lucide="building-2" class="text-[#ffcd00] w-10 h-10"></i>
+          <div class="w-16 h-16 flex items-center justify-center">
+            <img src="/logo.svg" alt="Logo" class="w-full h-full object-contain" referrerPolicy="no-referrer" />
           </div>
         </div>
         <h2 class="mt-6 text-center text-3xl font-black text-gray-900 tracking-tighter uppercase">
