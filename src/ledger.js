@@ -14,93 +14,87 @@ export function renderLedger(container) {
   // Clear selection after use
   delete window.ledgerSelection;
 
+  const getEntries = (party, type) => {
+    const entries = [];
+    if (!party) return entries;
+
+    if (type === 'customer') {
+      const sales = state.company.modules.sales.filter(s => s.customer === party.name && s.status !== 'Canceled');
+      sales.forEach(s => {
+        // Add the bill entry (Debit for Customer)
+        entries.push({
+          date: s.date,
+          particulars: `BILL NUMBER ${s.invoiceNumber}`,
+          debit: s.netBill,
+          credit: 0,
+          timestamp: new Date(s.date).getTime()
+        });
+        
+        // Add payment entries (Credit for Customer)
+        if (s.payments && Array.isArray(s.payments)) {
+          s.payments.forEach(p => {
+            entries.push({
+              date: p.date || s.date,
+              particulars: `PAYMENT RECEIVED OF BILL NUMBER ${s.invoiceNumber}${p.method ? ` (${p.method})` : ''}`,
+              debit: 0,
+              credit: p.amount,
+              timestamp: new Date(p.date || s.date).getTime() + 1
+            });
+          });
+        } else if (s.status === 'Paid') {
+          entries.push({
+            date: s.date,
+            particulars: `PAYMENT RECEIVED OF BILL NUMBER ${s.invoiceNumber}`,
+            debit: 0,
+            credit: s.netBill,
+            timestamp: new Date(s.date).getTime() + 1
+          });
+        }
+      });
+    } else {
+      const purchases = state.company.modules.purchase.filter(p => p.vendor === party.name && p.status !== 'Canceled');
+      purchases.forEach(p => {
+        // For vendors: Bill is Credit, Payment is Debit
+        entries.push({
+          date: p.date,
+          particulars: `Purchase Bill Entry - ${p.billNumber}`,
+          debit: 0,
+          credit: p.netBill,
+          timestamp: new Date(p.date).getTime()
+        });
+        
+        if (p.payments && Array.isArray(p.payments)) {
+          p.payments.forEach(pay => {
+            entries.push({
+              date: pay.date || p.date,
+              particulars: `Payment Given of Bill Number ${p.billNumber}${pay.method ? ` (${pay.method})` : ''}`,
+              debit: pay.amount,
+              credit: 0,
+              timestamp: new Date(pay.date || p.date).getTime() + 1
+            });
+          });
+        } else if (p.status === 'Paid') {
+          entries.push({
+            date: p.date,
+            particulars: `Payment Given of Bill Number ${p.billNumber}`,
+            debit: p.netBill,
+            credit: 0,
+            timestamp: new Date(p.date).getTime() + 1
+          });
+        }
+      });
+    }
+
+    entries.sort((a, b) => a.timestamp - b.timestamp);
+    return entries;
+  };
+
   const updateLedgerView = () => {
     const party = selectedPartyType === 'customer' 
       ? customers.find(c => c.id === selectedPartyId)
       : vendors.find(v => v.id === selectedPartyId);
 
-    const entries = [];
-    if (party) {
-      if (selectedPartyType === 'customer') {
-        const sales = state.company.modules.sales.filter(s => s.customer === party.name && s.status !== 'Canceled');
-        sales.forEach(s => {
-          const displayBillNo = s.invoiceNumber;
-          
-          // Add the bill entry (Debit)
-          entries.push({
-            date: s.date,
-            particulars: `BILL NUMBER ${displayBillNo}`,
-            debit: s.netBill,
-            credit: 0,
-            timestamp: new Date(s.date).getTime()
-          });
-          
-          // Add payment entries (Credit)
-          if (s.payments && Array.isArray(s.payments)) {
-            s.payments.forEach(p => {
-              entries.push({
-                date: p.date || s.date,
-                particulars: `PAYMENT RECEIVED OF BILL NUMBER ${s.invoiceNumber}${p.method ? ` (${p.method})` : ''}`,
-                debit: 0,
-                credit: p.amount,
-                timestamp: new Date(p.date || s.date).getTime() + 1 // Ensure payment comes after bill if same date
-              });
-            });
-          } else if (s.status === 'Paid') {
-            // If it's paid but no payments array (legacy or direct), show full credit
-            entries.push({
-              date: s.date,
-              particulars: `PAYMENT RECEIVED OF BILL NUMBER ${s.invoiceNumber}`,
-              debit: 0,
-              credit: s.netBill,
-              timestamp: new Date(s.date).getTime() + 1
-            });
-          }
-        });
-      } else {
-        const purchases = state.company.modules.purchase.filter(p => p.vendor === party.name && p.status !== 'Canceled');
-        purchases.forEach(p => {
-          const displayBillNo = p.billNumber;
-
-          // For vendors, Purchase is Debit (we owe them), Payment is Credit (we paid them)
-          // Wait, the user's logic for Customer is Bill=Debit, Payment=Credit.
-          // For Vendor, it should be the opposite? Or same?
-          // Usually, in a "Vendor Ledger", we show what we owe them.
-          // Let's stick to the same visual logic as Customer for consistency if they want it "exactly like PDF".
-          
-          entries.push({
-            date: p.date,
-            particulars: `BILL NUMBER ${displayBillNo}`,
-            debit: p.netBill,
-            credit: 0,
-            timestamp: new Date(p.date).getTime()
-          });
-          
-          if (p.payments && Array.isArray(p.payments)) {
-            p.payments.forEach(pay => {
-              entries.push({
-                date: pay.date || p.date,
-                particulars: `PAYMENT MADE FOR BILL NUMBER ${p.billNumber}${pay.method ? ` (${pay.method})` : ''}`,
-                debit: 0,
-                credit: pay.amount,
-                timestamp: new Date(pay.date || p.date).getTime() + 1
-              });
-            });
-          } else if (p.status === 'Paid') {
-            entries.push({
-              date: p.date,
-              particulars: `PAYMENT MADE FOR BILL NUMBER ${p.billNumber}`,
-              debit: 0,
-              credit: p.netBill,
-              timestamp: new Date(p.date).getTime() + 1
-            });
-          }
-        });
-      }
-    }
-
-    // Sort by date
-    entries.sort((a, b) => a.timestamp - b.timestamp);
+    const entries = getEntries(party, selectedPartyType);
 
     const totalDebit = entries.reduce((sum, e) => sum + e.debit, 0);
     const totalCredit = entries.reduce((sum, e) => sum + e.credit, 0);
@@ -271,72 +265,9 @@ export function renderLedger(container) {
       ? customers.find(c => c.id === selectedPartyId)
       : vendors.find(v => v.id === selectedPartyId);
     
-    // Recalculate everything for the PDF
-    const entries = [];
-    if (party) {
-      if (selectedPartyType === 'customer') {
-        const sales = state.company.modules.sales.filter(s => s.customer === party.name && s.status !== 'Canceled');
-        sales.forEach(s => {
-          entries.push({
-            date: s.date,
-            particulars: `BILL NUMBER ${s.invoiceNumber}`,
-            debit: s.netBill,
-            credit: 0,
-            timestamp: new Date(s.date).getTime()
-          });
-          if (s.payments && Array.isArray(s.payments)) {
-            s.payments.forEach(p => {
-              entries.push({
-                date: p.date || s.date,
-                particulars: `PAYMENT RECEIVED OF BILL NUMBER ${s.invoiceNumber}${p.method ? ` (${p.method})` : ''}`,
-                debit: 0,
-                credit: p.amount,
-                timestamp: new Date(p.date || s.date).getTime() + 1
-              });
-            });
-          } else if (s.status === 'Paid') {
-            entries.push({
-              date: s.date,
-              particulars: `PAYMENT RECEIVED OF BILL NUMBER ${s.invoiceNumber}`,
-              debit: 0,
-              credit: s.netBill,
-              timestamp: new Date(s.date).getTime() + 1
-            });
-          }
-        });
-      } else {
-        const purchases = state.company.modules.purchase.filter(p => p.vendor === party.name && p.status !== 'Canceled');
-        purchases.forEach(p => {
-          entries.push({
-            date: p.date,
-            particulars: `BILL NUMBER ${p.billNumber}`,
-            debit: p.netBill,
-            credit: 0,
-            timestamp: new Date(p.date).getTime()
-          });
-          if (p.payments && Array.isArray(p.payments)) {
-            p.payments.forEach(pay => {
-              entries.push({
-                date: pay.date || p.date,
-                particulars: `PAYMENT MADE FOR BILL NUMBER ${p.billNumber}${pay.method ? ` (${pay.method})` : ''}`,
-                debit: 0,
-                credit: pay.amount,
-                timestamp: new Date(pay.date || p.date).getTime() + 1
-              });
-            });
-          } else if (p.status === 'Paid') {
-            entries.push({
-              date: p.date,
-              particulars: `PAYMENT MADE FOR BILL NUMBER ${p.billNumber}`,
-              debit: 0,
-              credit: p.netBill,
-              timestamp: new Date(p.date).getTime() + 1
-            });
-          }
-        });
-      }
-    }
-    entries.sort((a, b) => a.timestamp - b.timestamp);
+    // Use the optimized helper for both UI and PDF
+    const entries = getEntries(party, selectedPartyType);
+    
     const totalDebit = entries.reduce((sum, e) => sum + e.debit, 0);
     const totalCredit = entries.reduce((sum, e) => sum + e.credit, 0);
     const closingBalance = totalDebit - totalCredit;
