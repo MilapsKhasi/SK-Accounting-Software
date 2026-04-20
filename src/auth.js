@@ -9,10 +9,10 @@ export function renderAuth(container) {
             <img src="/logo.svg" alt="Logo" class="w-full h-full object-contain" referrerPolicy="no-referrer" />
           </div>
         </div>
-        <h2 class="mt-6 text-center text-3xl font-black text-gray-900 tracking-tighter uppercase">
+        <h2 class="mt-6 text-center text-3xl font-medium text-gray-900 tracking-tighter uppercase">
           SK Accounting
         </h2>
-        <p class="mt-2 text-center text-xs font-bold text-gray-500 uppercase tracking-widest">
+        <p class="mt-2 text-center text-xs font-medium text-gray-500 uppercase tracking-widest">
           Sign in to manage your business
         </p>
       </div>
@@ -21,39 +21,39 @@ export function renderAuth(container) {
         <div class="bg-white py-8 px-4 sm:px-10 border border-gray-200">
           <form id="auth-form" class="space-y-6">
             <div>
-              <label for="email" class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              <label for="email" class="block text-[10px] font-medium text-gray-400 uppercase tracking-widest">
                 Email address
               </label>
               <div class="mt-1">
                 <input id="email" name="email" type="email" required 
-                  class="appearance-none block w-full px-4 py-2 border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1e2a38] text-sm font-bold transition-all"
+                  class="appearance-none block w-full px-4 py-2 border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1e2a38] text-sm font-medium transition-all"
                   placeholder="you@example.com">
               </div>
             </div>
 
             <div>
-              <label for="password" class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              <label for="password" class="block text-[10px] font-medium text-gray-400 uppercase tracking-widest">
                 Password
               </label>
               <div class="mt-1">
                 <input id="password" name="password" type="password" required 
-                  class="appearance-none block w-full px-4 py-2 border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1e2a38] text-sm font-bold transition-all"
+                  class="appearance-none block w-full px-4 py-2 border border-gray-200 focus:outline-none focus:ring-1 focus:ring-[#1e2a38] text-sm font-medium transition-all"
                   placeholder="••••••••">
               </div>
             </div>
 
-            <div id="auth-error" class="hidden p-3 bg-red-50 border border-red-200 flex items-center gap-2 text-[#f44336] text-[10px] font-bold uppercase tracking-widest">
+            <div id="auth-error" class="hidden p-3 bg-red-50 border border-red-200 flex items-center gap-2 text-[#f44336] text-[10px] font-medium uppercase tracking-widest">
               <i data-lucide="alert-circle" class="w-4 h-4"></i>
               <span id="error-message"></span>
             </div>
 
             <div class="flex flex-col gap-3 pt-2">
               <button type="submit" id="signin-btn"
-                class="w-full flex justify-center py-3 px-4 text-xs font-bold text-white bg-[#1e2a38] hover:bg-[#2c3e50] focus:outline-none uppercase tracking-widest transition-all">
+                class="w-full flex justify-center py-3 px-4 text-xs font-medium text-white bg-[#1e2a38] hover:bg-[#2c3e50] focus:outline-none uppercase tracking-widest transition-all">
                 Sign In
               </button>
               <button type="button" id="signup-btn"
-                class="w-full flex justify-center py-3 px-4 border border-gray-200 text-xs font-bold text-gray-700 bg-white hover:bg-gray-50 focus:outline-none uppercase tracking-widest transition-all">
+                class="w-full flex justify-center py-3 px-4 border border-gray-200 text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none uppercase tracking-widest transition-all">
                 Create Account
               </button>
             </div>

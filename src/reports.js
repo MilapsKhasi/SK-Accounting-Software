@@ -6,7 +6,7 @@ export function renderReports(container) {
   container.innerHTML = `
     <div class="p-8 space-y-8">
       <header>
-        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Reports</h1>
+        <h1 class="text-3xl font-medium text-gray-900 tracking-tight">Reports</h1>
         <p class="text-gray-500 mt-1">Generate and export business reports</p>
       </header>
 
@@ -16,10 +16,10 @@ export function renderReports(container) {
             <i data-lucide="trending-up" class="w-8 h-8 text-[#1e2a38]"></i>
           </div>
           <div>
-            <h3 class="font-bold text-gray-900 uppercase tracking-widest text-sm">Sales Report</h3>
-            <p class="text-[10px] text-gray-500 mt-1 uppercase font-bold">Summary of all sales transactions</p>
+            <h3 class="font-medium text-gray-900 uppercase tracking-widest text-sm">Sales Report</h3>
+            <p class="text-[10px] text-gray-500 mt-1 uppercase font-medium">Summary of all sales transactions</p>
           </div>
-          <button id="gen-sales-report" class="w-full py-2.5 bg-[#1e2a38] text-white font-bold text-xs hover:bg-[#2c3e50] transition-all uppercase tracking-widest">
+          <button id="gen-sales-report" class="w-full py-2.5 bg-[#1e2a38] text-white font-medium text-xs hover:bg-[#2c3e50] transition-all uppercase tracking-widest">
             Generate PDF
           </button>
         </div>
@@ -29,10 +29,10 @@ export function renderReports(container) {
             <i data-lucide="shopping-cart" class="w-8 h-8 text-[#1e2a38]"></i>
           </div>
           <div>
-            <h3 class="font-bold text-gray-900 uppercase tracking-widest text-sm">Purchase Report</h3>
-            <p class="text-[10px] text-gray-500 mt-1 uppercase font-bold">Summary of all purchase transactions</p>
+            <h3 class="font-medium text-gray-900 uppercase tracking-widest text-sm">Purchase Report</h3>
+            <p class="text-[10px] text-gray-500 mt-1 uppercase font-medium">Summary of all purchase transactions</p>
           </div>
-          <button id="gen-purchase-report" class="w-full py-2.5 bg-[#1e2a38] text-white font-bold text-xs hover:bg-[#2c3e50] transition-all uppercase tracking-widest">
+          <button id="gen-purchase-report" class="w-full py-2.5 bg-[#1e2a38] text-white font-medium text-xs hover:bg-[#2c3e50] transition-all uppercase tracking-widest">
             Generate PDF
           </button>
         </div>
@@ -42,10 +42,10 @@ export function renderReports(container) {
             <i data-lucide="package" class="w-8 h-8 text-[#1e2a38]"></i>
           </div>
           <div>
-            <h3 class="font-bold text-gray-900 uppercase tracking-widest text-sm">Inventory Report</h3>
-            <p class="text-[10px] text-gray-500 mt-1 uppercase font-bold">Current stock levels and valuation</p>
+            <h3 class="font-medium text-gray-900 uppercase tracking-widest text-sm">Inventory Report</h3>
+            <p class="text-[10px] text-gray-500 mt-1 uppercase font-medium">Current stock levels and valuation</p>
           </div>
-          <button id="gen-inventory-report" class="w-full py-2.5 bg-[#1e2a38] text-white font-bold text-xs hover:bg-[#2c3e50] transition-all uppercase tracking-widest">
+          <button id="gen-inventory-report" class="w-full py-2.5 bg-[#1e2a38] text-white font-medium text-xs hover:bg-[#2c3e50] transition-all uppercase tracking-widest">
             Generate PDF
           </button>
         </div>

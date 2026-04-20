@@ -7,10 +7,10 @@ export function renderVendors(container) {
     <div class="p-8 space-y-8">
       <header class="flex justify-between items-end">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Vendor Master</h1>
+          <h1 class="text-3xl font-medium text-gray-900 tracking-tight">Vendor Master</h1>
           <p class="text-gray-500 mt-1">Manage your suppliers and vendors</p>
         </div>
-        <button id="new-vendor-btn" class="flex items-center gap-2 px-4 py-2 bg-[#1e2a38] text-white hover:bg-[#2c3e50] transition-colors text-xs font-bold uppercase tracking-widest">
+        <button id="new-vendor-btn" class="flex items-center gap-2 px-4 py-2 bg-[#1e2a38] text-white hover:bg-[#2c3e50] transition-colors text-xs font-medium uppercase tracking-widest">
           <i data-lucide="plus" class="w-4 h-4"></i> Add New Vendor
         </button>
       </header>
@@ -20,17 +20,17 @@ export function renderVendors(container) {
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-gray-50/50 border-b border-gray-100">
-                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Vendor Name</th>
-                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">GSTIN</th>
-                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Contact Person</th>
-                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Phone</th>
-                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                <th class="px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-widest">Vendor Name</th>
+                <th class="px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-widest">GSTIN</th>
+                <th class="px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-widest">Contact Person</th>
+                <th class="px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-widest">Phone</th>
+                <th class="px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-widest text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
               ${vendors.map(vendor => `
                 <tr class="hover:bg-gray-50/50 transition-colors cursor-pointer group" data-id="${vendor.id}">
-                  <td class="px-6 py-4 text-sm font-bold text-gray-900">${vendor.name}</td>
+                  <td class="px-6 py-4 text-sm font-medium text-gray-900">${vendor.name}</td>
                   <td class="px-6 py-4 font-mono text-sm text-gray-500">${vendor.gstin || 'N/A'}</td>
                   <td class="px-6 py-4 text-sm text-gray-500">${vendor.contactPerson || 'N/A'}</td>
                   <td class="px-6 py-4 text-sm text-gray-500">${vendor.phone || 'N/A'}</td>
@@ -92,7 +92,7 @@ function openVendorModal(vendor = null) {
   modal.innerHTML = `
     <div class="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200">
       <div class="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-        <h2 class="text-xl font-bold text-gray-900 uppercase tracking-tight">${isEditing ? 'Edit' : 'Add'} Vendor</h2>
+        <h2 class="text-xl font-medium text-gray-900 uppercase tracking-tight">${isEditing ? 'Edit' : 'Add'} Vendor</h2>
         <button id="close-modal" class="p-2 hover:bg-gray-100 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
@@ -100,40 +100,40 @@ function openVendorModal(vendor = null) {
       
       <form id="vendor-form" class="p-8 space-y-6">
         <div class="space-y-2">
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Vendor Name</label>
-          <input name="name" value="${initialData.name}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" required />
+          <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Vendor Name</label>
+          <input name="name" value="${initialData.name}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" required />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">GSTIN</label>
-            <input name="gstin" value="${initialData.gstin}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-mono font-bold" />
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">GSTIN</label>
+            <input name="gstin" value="${initialData.gstin}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-mono font-medium" />
           </div>
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Contact Person</label>
-            <input name="contactPerson" value="${initialData.contactPerson}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Contact Person</label>
+            <input name="contactPerson" value="${initialData.contactPerson}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" />
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Email</label>
-            <input type="email" name="email" value="${initialData.email}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Email</label>
+            <input type="email" name="email" value="${initialData.email}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" />
           </div>
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Phone</label>
-            <input name="phone" value="${initialData.phone}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Phone</label>
+            <input name="phone" value="${initialData.phone}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" />
           </div>
         </div>
 
         <div class="space-y-2">
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Address</label>
-          <textarea name="address" rows="3" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold">${initialData.address}</textarea>
+          <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Address</label>
+          <textarea name="address" rows="3" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium">${initialData.address}</textarea>
         </div>
 
         <div class="flex justify-end gap-3 pt-4">
-          <button type="button" id="cancel-modal" class="px-6 py-2.5 text-xs font-bold text-gray-500 hover:bg-gray-50 transition-colors uppercase tracking-widest">Cancel</button>
-          <button type="submit" class="px-8 py-2.5 bg-[#1e2a38] text-white text-xs font-bold hover:bg-[#2c3e50] transition-all uppercase tracking-widest">Save Vendor</button>
+          <button type="button" id="cancel-modal" class="px-6 py-2.5 text-xs font-medium text-gray-500 hover:bg-gray-50 transition-colors uppercase tracking-widest">Cancel</button>
+          <button type="submit" class="px-8 py-2.5 bg-[#1e2a38] text-white text-xs font-medium hover:bg-[#2c3e50] transition-all uppercase tracking-widest">Save Vendor</button>
         </div>
       </form>
     </div>

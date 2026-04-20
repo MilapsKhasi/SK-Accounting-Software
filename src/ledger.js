@@ -108,32 +108,32 @@ export function renderLedger(container) {
         
         <!-- Header Box -->
         <div class="border-2 border-black p-4 text-center mb-6">
-          <h1 class="text-2xl font-bold uppercase tracking-widest">${state.company.company_name}</h1>
+          <h1 class="text-2xl font-medium uppercase tracking-widest">${state.company.company_name}</h1>
         </div>
 
         <!-- Info Section -->
         <div class="grid grid-cols-2 gap-x-12 gap-y-4 mb-6 text-[13px]">
           <div class="flex items-center gap-4">
-            <span class="font-bold w-32 uppercase">LEDGER OF</span>
-            <div class="flex-1 border-b border-black pb-1 font-bold uppercase">
+            <span class="font-medium w-32 uppercase">LEDGER OF</span>
+            <div class="flex-1 border-b border-black pb-1 font-medium uppercase">
               ${party ? party.name : 'CUSTOMER'}
             </div>
           </div>
           <div class="flex items-center gap-4">
-            <span class="font-bold w-32 uppercase">FROM DATE</span>
-            <div class="flex-1 border-b border-black pb-1 font-bold">
+            <span class="font-medium w-32 uppercase">FROM DATE</span>
+            <div class="flex-1 border-b border-black pb-1 font-medium">
               ${fromDate}
             </div>
           </div>
           <div class="flex items-center gap-4">
-            <span class="font-bold w-32 uppercase">GSTIN NUMBER</span>
-            <div class="flex-1 border-b border-black pb-1 font-bold uppercase">
+            <span class="font-medium w-32 uppercase">GSTIN NUMBER</span>
+            <div class="flex-1 border-b border-black pb-1 font-medium uppercase">
               ${party ? (party.gstin || 'GSTIN NUMBER') : 'GSTIN NUMBER'}
             </div>
           </div>
           <div class="flex items-center gap-4">
-            <span class="font-bold w-32 uppercase">TO DATE</span>
-            <div class="flex-1 border-b border-black pb-1 font-bold">
+            <span class="font-medium w-32 uppercase">TO DATE</span>
+            <div class="flex-1 border-b border-black pb-1 font-medium">
               ${toDate}
             </div>
           </div>
@@ -144,10 +144,10 @@ export function renderLedger(container) {
           <table class="w-full border-collapse text-[13px]">
             <thead>
               <tr class="border-b-2 border-black">
-                <th class="border-r-2 border-black px-4 py-2 text-left w-20 font-bold uppercase italic">SR NO</th>
-                <th class="border-r-2 border-black px-4 py-2 text-left font-bold uppercase italic">PARTICULARS</th>
-                <th class="border-r-2 border-black px-4 py-2 text-right w-40 font-bold uppercase italic">DEBIT</th>
-                <th class="px-4 py-2 text-right w-40 font-bold uppercase italic">CREDIT</th>
+                <th class="border-r-2 border-black px-4 py-2 text-left w-20 font-medium uppercase italic">SR NO</th>
+                <th class="border-r-2 border-black px-4 py-2 text-left font-medium uppercase italic">PARTICULARS</th>
+                <th class="border-r-2 border-black px-4 py-2 text-right w-40 font-medium uppercase italic">DEBIT</th>
+                <th class="px-4 py-2 text-right w-40 font-medium uppercase italic">CREDIT</th>
               </tr>
             </thead>
             <tbody>
@@ -170,13 +170,13 @@ export function renderLedger(container) {
             </tbody>
             <tfoot>
               <tr class="border-t-2 border-black bg-white">
-                <td colspan="2" class="border-r-2 border-black px-4 py-2 text-center font-bold uppercase italic">GRAND TOTAL</td>
-                <td class="border-r-2 border-black px-4 py-2 text-right font-bold">${totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
-                <td class="px-4 py-2 text-right font-bold">${totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                <td colspan="2" class="border-r-2 border-black px-4 py-2 text-center font-medium uppercase italic">GRAND TOTAL</td>
+                <td class="border-r-2 border-black px-4 py-2 text-right font-medium">${totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                <td class="px-4 py-2 text-right font-medium">${totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
               </tr>
               <tr class="border-t-2 border-black bg-white">
-                <td colspan="3" class="border-r-2 border-black px-4 py-2 text-center font-bold uppercase italic">NET CLOSING BALANCE</td>
-                <td class="px-4 py-2 text-right font-bold">${Math.abs(closingBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
+                <td colspan="3" class="border-r-2 border-black px-4 py-2 text-center font-medium uppercase italic">NET CLOSING BALANCE</td>
+                <td class="px-4 py-2 text-right font-medium">${Math.abs(closingBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
               </tr>
             </tfoot>
           </table>
@@ -189,11 +189,11 @@ export function renderLedger(container) {
     <div class="p-8 space-y-8">
       <header class="flex justify-between items-center">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Party Ledger</h1>
+          <h1 class="text-3xl font-medium text-gray-900 tracking-tight">Party Ledger</h1>
           <p class="text-gray-500 mt-1">View detailed transaction history for customers and vendors</p>
         </div>
         <div class="flex gap-4">
-          <button id="print-ledger-btn" class="flex items-center gap-2 px-4 py-2 bg-[#1e2a38] text-white transition-colors text-xs font-bold uppercase tracking-widest">
+          <button id="print-ledger-btn" class="flex items-center gap-2 px-4 py-2 bg-[#1e2a38] text-white transition-colors text-xs font-medium uppercase tracking-widest">
             <i data-lucide="printer" class="w-4 h-4"></i> Print Ledger
           </button>
         </div>
@@ -202,26 +202,26 @@ export function renderLedger(container) {
       <div class="bg-white p-6 border border-gray-200 space-y-6">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Party Type</label>
-            <select id="party-type" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold">
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Party Type</label>
+            <select id="party-type" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium">
               <option value="customer">Customer</option>
               <option value="vendor">Vendor</option>
             </select>
           </div>
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Select Party</label>
-            <select id="party-select" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold">
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Select Party</label>
+            <select id="party-select" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium">
               <option value="">Choose a party...</option>
               ${customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
             </select>
           </div>
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">From Date</label>
-            <input type="date" id="from-date" value="2025-03-31" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">From Date</label>
+            <input type="date" id="from-date" value="2025-03-31" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" />
           </div>
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">To Date</label>
-            <input type="date" id="to-date" value="2026-04-01" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">To Date</label>
+            <input type="date" id="to-date" value="2026-04-01" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" />
           </div>
         </div>
       </div>

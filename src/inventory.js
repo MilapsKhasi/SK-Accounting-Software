@@ -7,26 +7,26 @@ export function renderInventory(container) {
     <div class="p-8 space-y-8">
       <header class="flex justify-between items-end">
         <div>
-          <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Inventory Management</h1>
+          <h1 class="text-3xl font-medium text-gray-900 tracking-tight">Inventory Management</h1>
           <p class="text-gray-500 mt-1">Monitor and manage your stock levels</p>
         </div>
-        <button id="new-inventory-btn" class="flex items-center gap-2 px-4 py-2 bg-[#1e2a38] text-white hover:bg-[#2c3e50] transition-colors text-xs font-bold uppercase tracking-widest">
+        <button id="new-inventory-btn" class="flex items-center gap-2 px-4 py-2 bg-[#1e2a38] text-white hover:bg-[#2c3e50] transition-colors text-xs font-medium uppercase tracking-widest">
           <i data-lucide="plus" class="w-4 h-4"></i> Add New Item
         </button>
       </header>
 
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white p-6 border border-gray-200">
-          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Items</p>
-          <p class="text-2xl font-bold mt-1 text-[#1e2a38]">${inventory.length}</p>
+          <p class="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Total Items</p>
+          <p class="text-2xl font-medium mt-1 text-[#1e2a38]">${inventory.length}</p>
         </div>
         <div class="bg-white p-6 border border-gray-200">
-          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Low Stock Items</p>
-          <p class="text-2xl font-bold mt-1 text-[#f44336]">${inventory.filter(i => i.quantity <= (i.min_stock || 0)).length}</p>
+          <p class="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Low Stock Items</p>
+          <p class="text-2xl font-medium mt-1 text-[#f44336]">${inventory.filter(i => i.quantity <= (i.min_stock || 0)).length}</p>
         </div>
         <div class="bg-white p-6 border border-gray-200">
-          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Stock Value</p>
-          <p class="text-2xl font-bold mt-1 text-[#1e2a38]">₹${state.company.reports_snapshot.stock_value.toLocaleString()}</p>
+          <p class="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Total Stock Value</p>
+          <p class="text-2xl font-medium mt-1 text-[#1e2a38]">₹${state.company.reports_snapshot.stock_value.toLocaleString()}</p>
         </div>
       </div>
 
@@ -35,19 +35,19 @@ export function renderInventory(container) {
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-gray-50/50 border-b border-gray-100">
-                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Item Name</th>
-                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">SKU / HSN</th>
-                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Category</th>
-                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Quantity</th>
-                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Price</th>
-                <th class="px-6 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                <th class="px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-widest">Item Name</th>
+                <th class="px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-widest">SKU / HSN</th>
+                <th class="px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-widest">Category</th>
+                <th class="px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-widest text-right">Quantity</th>
+                <th class="px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-widest text-right">Price</th>
+                <th class="px-6 py-4 text-xs font-medium text-gray-400 uppercase tracking-widest text-right">Actions</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
               ${inventory.map(item => `
                 <tr class="hover:bg-gray-50/50 transition-colors cursor-pointer group" data-id="${item.id}">
                   <td class="px-6 py-4">
-                    <p class="text-sm font-bold text-gray-900">${item.name}</p>
+                    <p class="text-sm font-medium text-gray-900">${item.name}</p>
                     <p class="text-[10px] text-gray-400 uppercase tracking-wider">${item.unit || 'Units'}</p>
                   </td>
                   <td class="px-6 py-4">
@@ -56,7 +56,7 @@ export function renderInventory(container) {
                   </td>
                   <td class="px-6 py-4 text-sm text-gray-500">${item.category || 'General'}</td>
                   <td class="px-6 py-4 text-right">
-                    <span class="text-sm font-bold ${item.quantity <= (item.min_stock || 0) ? 'text-red-600' : 'text-gray-900'}">
+                    <span class="text-sm font-medium ${item.quantity <= (item.min_stock || 0) ? 'text-red-600' : 'text-gray-900'}">
                       ${item.quantity}
                     </span>
                   </td>
@@ -117,7 +117,7 @@ function openInventoryModal(item = null) {
   modal.innerHTML = `
     <div class="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-100">
       <div class="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-        <h2 class="text-xl font-bold text-gray-900 uppercase tracking-tight">${isEditing ? 'Edit' : 'Add'} Inventory Item</h2>
+        <h2 class="text-xl font-medium text-gray-900 uppercase tracking-tight">${isEditing ? 'Edit' : 'Add'} Inventory Item</h2>
         <button id="close-modal" class="p-2 hover:bg-gray-100 transition-colors">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
@@ -125,29 +125,29 @@ function openInventoryModal(item = null) {
       
       <form id="inventory-form" class="p-8 space-y-6">
         <div class="space-y-2">
-          <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Item Name</label>
-          <input name="name" value="${initialData.name}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" required />
+          <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Item Name</label>
+          <input name="name" value="${initialData.name}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" required />
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">SKU</label>
-            <input name="sku" value="${initialData.sku || ''}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-mono font-bold" />
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">SKU</label>
+            <input name="sku" value="${initialData.sku || ''}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-mono font-medium" />
           </div>
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">HSN Code</label>
-            <input name="hsnCode" value="${initialData.hsn_code || initialData.hsnCode || ''}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-mono font-bold" />
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">HSN Code</label>
+            <input name="hsnCode" value="${initialData.hsn_code || initialData.hsnCode || ''}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-mono font-medium" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Quantity</label>
-            <input type="number" name="quantity" value="${initialData.quantity}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" required />
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Quantity</label>
+            <input type="number" name="quantity" value="${initialData.quantity}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" required />
           </div>
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Unit</label>
-            <select name="unit" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold">
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Unit</label>
+            <select name="unit" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium">
               <option value="Units" ${initialData.unit === 'Units' ? 'selected' : ''}>Units</option>
               <option value="Kg" ${initialData.unit === 'Kg' ? 'selected' : ''}>Kg</option>
               <option value="Litre" ${initialData.unit === 'Litre' ? 'selected' : ''}>Litre</option>
@@ -156,25 +156,25 @@ function openInventoryModal(item = null) {
             </select>
           </div>
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Min Stock Level</label>
-            <input type="number" name="minStock" value="${initialData.min_stock || initialData.minStock}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Min Stock Level</label>
+            <input type="number" name="minStock" value="${initialData.min_stock || initialData.minStock}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" />
           </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Price (₹)</label>
-            <input type="number" name="price" value="${initialData.price}" step="0.01" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Price (₹)</label>
+            <input type="number" name="price" value="${initialData.price}" step="0.01" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" />
           </div>
           <div class="space-y-2">
-            <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Category</label>
-            <input name="category" value="${initialData.category}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold" />
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Category</label>
+            <input name="category" value="${initialData.category}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" />
           </div>
         </div>
 
         <div class="flex justify-end gap-3 pt-4">
-          <button type="button" id="cancel-modal" class="px-6 py-2.5 text-xs font-bold text-gray-500 hover:bg-gray-50 transition-colors uppercase tracking-widest">Cancel</button>
-          <button type="submit" class="px-8 py-2.5 bg-[#1e2a38] text-white text-xs font-bold hover:bg-[#2c3e50] transition-all uppercase tracking-widest">Save Item</button>
+          <button type="button" id="cancel-modal" class="px-6 py-2.5 text-xs font-medium text-gray-500 hover:bg-gray-50 transition-colors uppercase tracking-widest">Cancel</button>
+          <button type="submit" class="px-8 py-2.5 bg-[#1e2a38] text-white text-xs font-medium hover:bg-[#2c3e50] transition-all uppercase tracking-widest">Save Item</button>
         </div>
       </form>
     </div>
