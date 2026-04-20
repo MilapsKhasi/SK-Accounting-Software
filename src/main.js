@@ -3,7 +3,6 @@ import { supabase } from './lib/supabase';
 import { renderAuth } from './auth';
 import { renderDashboard } from './dashboard';
 import { state, initData } from './state';
-import { renderCompanies } from './companies';
 import { createIcons, icons } from 'lucide';
 import './payments';
 
@@ -17,7 +16,7 @@ async function init() {
   } else {
     state.session = session;
     await initData();
-    renderAppContent();
+    renderDashboard(app);
   }
 
   supabase.auth.onAuthStateChange((_event, session) => {
@@ -25,29 +24,10 @@ async function init() {
     if (!session) {
       renderAuth(app);
     } else {
-      initData().then(() => renderAppContent());
+      initData().then(() => renderDashboard(app));
     }
   });
 }
-
-function renderAppContent() {
-  if (!state.selectedCompany) {
-    renderCompanies(app);
-  } else {
-    renderDashboard(app);
-  }
-}
-
-// Subscribe to state changes to handle company switching
-state.listeners.push(() => {
-  const isDashboardVisible = !!document.getElementById('content-area');
-  const shouldShowDashboard = !!state.selectedCompany;
-
-  // Only re-render if the state doesn't match the current view
-  if (isDashboardVisible !== shouldShowDashboard) {
-    renderAppContent();
-  }
-});
 
 init();
 

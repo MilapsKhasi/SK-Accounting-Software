@@ -1,4 +1,4 @@
-import { state, subscribe, setupSubscriptions, cleanupSubscriptions, notify, switchCompany } from './state';
+import { state, subscribe, setupSubscriptions, cleanupSubscriptions } from './state';
 import { supabase } from './lib/supabase';
 import { renderSales } from './sales';
 import { renderPurchase } from './purchase';
@@ -73,10 +73,6 @@ function updateUI(container) {
         </nav>
 
         <div class="p-4 border-t border-white/10 space-y-1">
-          <button id="switch-company-btn" class="w-full flex items-center gap-3 p-3 transition-all duration-200 text-gray-400 hover:bg-white/5 hover:text-white">
-            <i data-lucide="building-2" class="w-5 h-5 flex-shrink-0"></i>
-            <span class="font-medium ${isSidebarOpen ? '' : 'hidden'}">Switch Company</span>
-          </button>
           <button id="logout-btn" class="w-full flex items-center gap-3 p-3 transition-all duration-200 bg-[#f44336] text-white hover:bg-[#d32f2f]">
             <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i>
             <span class="font-medium ${isSidebarOpen ? '' : 'hidden'}">Sign Out</span>
@@ -111,7 +107,6 @@ function updateUI(container) {
         </div>
       </main>
     </div>
-    <div id="dashboard-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm"></div>
   `;
 
   window.renderIcons();
@@ -127,10 +122,6 @@ function updateUI(container) {
   document.getElementById('logout-btn').onclick = () => {
     cleanupSubscriptions();
     supabase.auth.signOut();
-  };
-
-  document.getElementById('switch-company-btn').onclick = () => {
-    showSwitchCompanyModal();
   };
 
   document.getElementById('toggle-sidebar').onclick = () => {
@@ -239,71 +230,5 @@ function renderDashboardView() {
       </div>
     </div>
   `;
-}
-
-function showSwitchCompanyModal() {
-  const modal = document.getElementById('dashboard-modal');
-  modal.classList.remove('hidden');
-
-  const { companies, selectedCompany } = state;
-
-  modal.innerHTML = `
-    <div class="bg-white w-full max-w-lg border border-gray-100 shadow-2xl flex flex-col max-h-[80vh]">
-      <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-        <div>
-          <h2 class="text-xl font-medium text-gray-900 uppercase tracking-tight">Switch Company</h2>
-          <p class="text-[10px] text-gray-500 font-medium uppercase tracking-widest mt-1">Select a business profile to view its reports</p>
-        </div>
-        <button id="close-switch-modal" class="p-2 hover:bg-gray-100 transition-colors">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
-      </div>
-      
-      <div class="flex-1 overflow-y-auto p-4 space-y-2">
-        ${companies.map(company => `
-          <button 
-            onclick="window.handleSwitchToCompany('${company.id}')"
-            class="w-full p-4 flex items-center justify-between group transition-all border ${selectedCompany?.id === company.id ? 'bg-[#1e2a38] border-[#1e2a38]' : 'bg-white border-gray-100 hover:border-[#1e2a38] hover:shadow-md'}"
-          >
-            <div class="flex items-center gap-4">
-              <div class="w-10 h-10 flex items-center justify-center font-medium ${selectedCompany?.id === company.id ? 'bg-white text-[#1e2a38]' : 'bg-gray-50 text-gray-400 group-hover:bg-[#1e2a38] group-hover:text-white transition-colors'}">
-                ${company.name.substring(0, 1).toUpperCase()}
-              </div>
-              <div class="text-left">
-                <p class="text-sm font-medium ${selectedCompany?.id === company.id ? 'text-white' : 'text-gray-900'}">${company.name}</p>
-                <p class="text-[10px] font-medium uppercase tracking-wider ${selectedCompany?.id === company.id ? 'text-gray-300' : 'text-gray-400'}">${company.gstin || 'No GSTIN'}</p>
-              </div>
-            </div>
-            ${selectedCompany?.id === company.id ? `
-              <div class="w-6 h-6 bg-[#ffcd00] flex items-center justify-center">
-                <i data-lucide="check" class="w-4 h-4 text-[#1e2a38]"></i>
-              </div>
-            ` : `
-              <i data-lucide="chevron-right" class="w-5 h-5 text-gray-300 group-hover:text-[#1e2a38] transform group-hover:translate-x-1 transition-all"></i>
-            `}
-          </button>
-        `).join('')}
-      </div>
-
-      <div class="p-6 border-t border-gray-50 bg-gray-50/30">
-        <button id="cancel-switch-modal" class="w-full py-3 bg-white border border-gray-200 text-gray-500 hover:text-gray-900 transition-all text-xs font-medium uppercase tracking-widest">
-          Cancel
-        </button>
-      </div>
-    </div>
-  `;
-
-  window.renderIcons();
-
-  window.handleSwitchToCompany = async (id) => {
-    const company = companies.find(c => c.id === id);
-    if (company) {
-      modal.classList.add('hidden');
-      await switchCompany(company);
-    }
-  };
-
-  document.getElementById('close-switch-modal').onclick = () => modal.classList.add('hidden');
-  document.getElementById('cancel-switch-modal').onclick = () => modal.classList.add('hidden');
 }
 

@@ -3,8 +3,6 @@ import { supabase } from './lib/supabase';
 export const state = {
   session: null,
   loading: true,
-  companies: [],
-  selectedCompany: null,
   company: {
     company_name: "SK Enterprise",
     gst_number: "",
@@ -53,48 +51,8 @@ export async function initData(silent = false) {
   }
 
   try {
-    // 1. Fetch Companies first
-    const { data: companies, error: companiesError } = await supabase
-      .from('companies')
-      .select('*')
-      .order('name');
-    
-    if (companiesError) throw companiesError;
-    
-    state.companies = companies || [];
-
-    // 2. Select company if not already selected (e.g. from localStorage)
-    const savedCompanyId = localStorage.getItem('last_company_id');
-    if (savedCompanyId) {
-      const saved = state.companies.find(c => c.id === savedCompanyId);
-      if (saved) {
-        state.selectedCompany = saved;
-      }
-    }
-
-    if (state.selectedCompany) {
-      await initCompanyData(state.selectedCompany.id, true);
-    } else {
-      state.loading = false;
-      notify();
-    }
-  } catch (error) {
-    console.error("Error fetching data:", error);
-    state.loading = false;
-    notify();
-  }
-}
-
-export async function initCompanyData(companyId, isInternal = false) {
-  if (!state.session?.user?.id || !companyId) return;
-
-  if (!isInternal) {
-    state.loading = true;
-    notify();
-  }
-
-  try {
     const [
+      { data: profile },
       { data: vendors },
       { data: customers },
       { data: purchases },
@@ -102,12 +60,13 @@ export async function initCompanyData(companyId, isInternal = false) {
       { data: tasks },
       { data: inventory }
     ] = await Promise.all([
-      supabase.from('vendors').select('*').eq('company_id', companyId),
-      supabase.from('customers').select('*').eq('company_id', companyId),
-      supabase.from('purchase_entries').select('*').eq('company_id', companyId).order('date', { ascending: false }),
-      supabase.from('sales_entries').select('*').eq('company_id', companyId).order('date', { ascending: false }),
-      supabase.from('tasks').select('*').eq('company_id', companyId),
-      supabase.from('inventory').select('*').eq('company_id', companyId)
+      supabase.from('profiles').select('*').single(),
+      supabase.from('vendors').select('*'),
+      supabase.from('customers').select('*'),
+      supabase.from('purchase_entries').select('*').order('date', { ascending: false }),
+      supabase.from('sales_entries').select('*').order('date', { ascending: false }),
+      supabase.from('tasks').select('*'),
+      supabase.from('inventory').select('*')
     ]);
 
     const mappedSales = (sales || []).map(s => ({ 
@@ -135,10 +94,10 @@ export async function initCompanyData(companyId, isInternal = false) {
     }));
 
     state.company = {
-      company_name: state.selectedCompany.name,
-      gst_number: state.selectedCompany.gstin || "",
-      address: state.selectedCompany.address || "",
-      creation_date: state.selectedCompany.created_at || new Date().toISOString().split('T')[0],
+      company_name: profile?.company_name || "SK Enterprise",
+      gst_number: profile?.gst_number || "",
+      address: profile?.address || "",
+      creation_date: profile?.creation_date || new Date().toISOString().split('T')[0],
       modules: {
         purchase: mappedPurchases,
         sales: mappedSales,
@@ -168,49 +127,19 @@ export async function initCompanyData(companyId, isInternal = false) {
       },
       reports_snapshot: calculateSnapshot(mappedSales, mappedPurchases, inventory || [])
     };
+
+    if (!profile && state.session?.user?.id) {
+      await supabase.from('profiles').upsert({
+        user_id: state.session.user.id,
+        company_name: "SK Enterprise",
+      });
+    }
   } catch (error) {
-    console.error("Error fetching company data:", error);
+    console.error("Error fetching data:", error);
   } finally {
     state.loading = false;
     notify();
   }
-}
-
-export async function switchCompany(company) {
-  state.selectedCompany = company;
-  if (company) {
-    localStorage.setItem('last_company_id', company.id);
-    await initCompanyData(company.id);
-  } else {
-    localStorage.removeItem('last_company_id');
-    state.company.modules = {
-      purchase: [], sales: [], inventory: [], reports: [], vendors: [], customers: []
-    };
-    notify();
-  }
-}
-
-export async function saveCompany(company) {
-  const { data, error } = await supabase.from('companies').upsert({
-    id: company.id || crypto.randomUUID(),
-    user_id: state.session.user.id,
-    name: company.name,
-    gstin: company.gstin || '',
-    address: company.address || ''
-  }).select().single();
-
-  if (error) throw error;
-  await initData(true);
-  return data;
-}
-
-export async function deleteCompany(id) {
-  if (state.selectedCompany?.id === id) {
-    await switchCompany(null);
-  }
-  const { error } = await supabase.from('companies').delete().eq('id', id);
-  if (error) throw error;
-  await initData(true);
 }
 
 function calculateSnapshot(sales, purchases, inventory) {
@@ -236,12 +165,12 @@ export function setupSubscriptions() {
   cleanupSubscriptions();
 
   subscriptionChannels = [
-    supabase.channel('companies_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'companies' }, () => initData(true)),
-    supabase.channel('sales_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'sales_entries' }, () => state.selectedCompany && initCompanyData(state.selectedCompany.id, true)),
-    supabase.channel('purchase_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'purchase_entries' }, () => state.selectedCompany && initCompanyData(state.selectedCompany.id, true)),
-    supabase.channel('inventory_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => state.selectedCompany && initCompanyData(state.selectedCompany.id, true)),
-    supabase.channel('vendor_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'vendors' }, () => state.selectedCompany && initCompanyData(state.selectedCompany.id, true)),
-    supabase.channel('customer_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'customers' }, () => state.selectedCompany && initCompanyData(state.selectedCompany.id, true)),
+    supabase.channel('sales_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'sales_entries' }, () => initData(true)),
+    supabase.channel('purchase_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'purchase_entries' }, () => initData(true)),
+    supabase.channel('inventory_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'inventory' }, () => initData(true)),
+    supabase.channel('vendor_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'vendors' }, () => initData(true)),
+    supabase.channel('customer_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'customers' }, () => initData(true)),
+    supabase.channel('profile_changes').on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, () => initData(true)),
   ];
 
   subscriptionChannels.forEach(channel => channel.subscribe());
@@ -297,8 +226,7 @@ export async function saveSalesEntry(entry) {
     net_bill: entry.netBill,
     status: entry.status,
     gst_enabled: entry.gstEnabled,
-    payments: entry.payments,
-    company_id: state.selectedCompany.id
+    payments: entry.payments
   });
 }
 
@@ -362,8 +290,7 @@ export async function savePurchaseEntry(entry) {
     net_bill: entry.netBill,
     status: entry.status,
     gst_enabled: entry.gstEnabled,
-    payments: entry.payments,
-    company_id: state.selectedCompany.id
+    payments: entry.payments
   });
 }
 
@@ -403,8 +330,7 @@ export async function saveVendor(vendor) {
     created_at: vendor.createdAt,
     opening_balance: vendor.openingBalance,
     opening_balance_paid: vendor.openingBalancePaid,
-    opening_balance_date: vendor.openingBalanceDate,
-    company_id: state.selectedCompany.id
+    opening_balance_date: vendor.openingBalanceDate
   });
 }
 
@@ -435,8 +361,7 @@ export async function saveCustomer(customer) {
     created_at: customer.createdAt,
     opening_balance: customer.openingBalance,
     opening_balance_paid: customer.openingBalancePaid,
-    opening_balance_date: customer.openingBalanceDate,
-    company_id: state.selectedCompany.id
+    opening_balance_date: customer.openingBalanceDate
   });
 }
 
@@ -465,8 +390,7 @@ export async function saveInventory(item) {
     unit: item.unit,
     min_stock: item.minStock,
     price: item.price,
-    category: item.category,
-    company_id: state.selectedCompany.id
+    category: item.category
   });
 }
 
