@@ -264,14 +264,20 @@ function openPurchaseModal(entry = null) {
                   </div>
                 </div>
 
-                <div class="space-y-2">
-                  <label class="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Method</label>
-                  <select id="partial-method-select" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium">
-                    <option value="Cash">Cash</option>
-                    <option value="Bank">Bank</option>
-                    <option value="UPI">UPI</option>
-                    <option value="Cheque">Cheque</option>
-                  </select>
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="space-y-2">
+                    <label class="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Dated</label>
+                    <input type="date" id="partial-date-input" value="${new Date().toISOString().split('T')[0]}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" />
+                  </div>
+                  <div class="space-y-2">
+                    <label class="text-[10px] font-medium text-gray-400 uppercase tracking-widest">Method</label>
+                    <select id="partial-method-select" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium">
+                      <option value="Cash">Cash</option>
+                      <option value="Bank">Bank</option>
+                      <option value="UPI">UPI</option>
+                      <option value="Cheque">Cheque</option>
+                    </select>
+                  </div>
                 </div>
 
                 <button type="button" id="create-new-payment-btn" class="w-full py-3 bg-[#1e2a38] text-white text-xs font-normal capitalize tracking-widest hover:bg-[#2c3e50] transition-all">
@@ -288,6 +294,7 @@ function openPurchaseModal(entry = null) {
                       <div>
                         <span class="text-gray-900">₹${p.amount.toLocaleString()}</span>
                         <span class="text-gray-400 ml-2">via ${p.method}</span>
+                        <span class="text-gray-400 ml-2">on ${p.date}</span>
                       </div>
                       <button type="button" class="text-[#f44336] hover:bg-red-50 p-1" onclick="this.dispatchEvent(new CustomEvent('remove-pay', { detail: ${i}, bubbles: true }))">
                         <i data-lucide="trash-2" class="w-3 h-3"></i>
@@ -336,7 +343,8 @@ function openPurchaseModal(entry = null) {
           }
 
           const method = secondModal.querySelector('#partial-method-select').value;
-          currentPayments.push({ amount: amt, method, date: new Date().toISOString().split('T')[0] });
+          const pDate = secondModal.querySelector('#partial-date-input').value;
+          currentPayments.push({ amount: amt, method, date: pDate });
           renderSecondModal();
         };
 

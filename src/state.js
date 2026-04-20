@@ -103,8 +103,22 @@ export async function initData(silent = false) {
         sales: mappedSales,
         inventory: (inventory || []).map(i => ({ ...i })),
         reports: [],
-        vendors: (vendors || []).map(v => ({ ...v, contactPerson: v.contact_person, createdAt: v.created_at })),
-        customers: (customers || []).map(c => ({ ...c, contactPerson: c.contact_person, createdAt: c.created_at })),
+        vendors: (vendors || []).map(v => ({ 
+          ...v, 
+          contactPerson: v.contact_person, 
+          createdAt: v.created_at,
+          openingBalance: v.opening_balance || 0,
+          openingBalancePaid: v.opening_balance_paid || 0,
+          openingBalanceDate: v.opening_balance_date || v.created_at
+        })),
+        customers: (customers || []).map(c => ({ 
+          ...c, 
+          contactPerson: c.contact_person, 
+          createdAt: c.created_at,
+          openingBalance: c.opening_balance || 0,
+          openingBalancePaid: c.opening_balance_paid || 0,
+          openingBalanceDate: c.opening_balance_date || c.created_at
+        })),
       },
       task_queue: {
         urgent: (tasks || []).filter(t => t.status === 'urgent'),
@@ -313,7 +327,10 @@ export async function saveVendor(vendor) {
     email: vendor.email,
     phone: vendor.phone,
     address: vendor.address,
-    created_at: vendor.createdAt
+    created_at: vendor.createdAt,
+    opening_balance: vendor.openingBalance,
+    opening_balance_paid: vendor.openingBalancePaid,
+    opening_balance_date: vendor.openingBalanceDate
   });
 }
 
@@ -341,7 +358,10 @@ export async function saveCustomer(customer) {
     email: customer.email,
     phone: customer.phone,
     address: customer.address,
-    created_at: customer.createdAt
+    created_at: customer.createdAt,
+    opening_balance: customer.openingBalance,
+    opening_balance_paid: customer.openingBalancePaid,
+    opening_balance_date: customer.openingBalanceDate
   });
 }
 

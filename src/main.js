@@ -4,6 +4,7 @@ import { renderAuth } from './auth';
 import { renderDashboard } from './dashboard';
 import { state, initData } from './state';
 import { createIcons, icons } from 'lucide';
+import './payments';
 
 const app = document.getElementById('app');
 

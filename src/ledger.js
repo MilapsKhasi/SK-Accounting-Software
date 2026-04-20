@@ -11,12 +11,40 @@ export function renderLedger(container) {
   let fromDate = '2025-03-31';
   let toDate = '2026-04-01';
 
+  const formatDate = (dateStr) => {
+    if (!dateStr || !dateStr.includes('-')) return dateStr;
+    const [y, m, d] = dateStr.split('-');
+    return `${d}/${m}/${y.slice(-2)}`;
+  };
+
   // Clear selection after use
   delete window.ledgerSelection;
 
   const getEntries = (party, type) => {
     const entries = [];
     if (!party) return entries;
+
+    // Add Opening Balance if it exists
+    if (party.openingBalance && party.openingBalance > 0) {
+      entries.push({
+        date: party.openingBalanceDate || party.createdAt.split('T')[0],
+        particulars: 'OPENING BALANCE',
+        debit: type === 'customer' ? party.openingBalance : 0,
+        credit: type === 'vendor' ? party.openingBalance : 0,
+        timestamp: new Date(party.openingBalanceDate || party.createdAt).getTime() - 1000 // Ensure it's first
+      });
+
+      // Show payment against opening balance if any
+      if (party.openingBalancePaid && party.openingBalancePaid > 0) {
+        entries.push({
+          date: party.openingBalanceDate || party.createdAt.split('T')[0],
+          particulars: 'PAYMENT RECEIVED (OPENING BALANCE)',
+          debit: type === 'vendor' ? party.openingBalancePaid : 0,
+          credit: type === 'customer' ? party.openingBalancePaid : 0,
+          timestamp: new Date(party.openingBalanceDate || party.createdAt).getTime() - 500
+        });
+      }
+    }
 
     if (type === 'customer') {
       const sales = state.company.modules.sales.filter(s => s.customer === party.name && s.status !== 'Canceled');
@@ -122,7 +150,7 @@ export function renderLedger(container) {
           <div class="flex items-center gap-4">
             <span class="font-medium w-32 uppercase">FROM DATE</span>
             <div class="flex-1 border-b border-black pb-1 font-medium">
-              ${fromDate}
+              ${formatDate(fromDate)}
             </div>
           </div>
           <div class="flex items-center gap-4">
@@ -134,7 +162,7 @@ export function renderLedger(container) {
           <div class="flex items-center gap-4">
             <span class="font-medium w-32 uppercase">TO DATE</span>
             <div class="flex-1 border-b border-black pb-1 font-medium">
-              ${toDate}
+              ${formatDate(toDate)}
             </div>
           </div>
         </div>
@@ -145,6 +173,7 @@ export function renderLedger(container) {
             <thead>
               <tr class="border-b-2 border-black">
                 <th class="border-r-2 border-black px-4 py-2 text-left w-20 font-medium uppercase italic">SR NO</th>
+                <th class="border-r-2 border-black px-4 py-2 text-left w-32 font-medium uppercase italic">DATED</th>
                 <th class="border-r-2 border-black px-4 py-2 text-left font-medium uppercase italic">PARTICULARS</th>
                 <th class="border-r-2 border-black px-4 py-2 text-right w-40 font-medium uppercase italic">DEBIT</th>
                 <th class="px-4 py-2 text-right w-40 font-medium uppercase italic">CREDIT</th>
@@ -154,6 +183,7 @@ export function renderLedger(container) {
               ${entries.map((entry, index) => `
                 <tr class="h-10">
                   <td class="border-r-2 border-black px-4 py-2 font-medium">${index + 1}</td>
+                  <td class="border-r-2 border-black px-4 py-2 font-medium">${formatDate(entry.date)}</td>
                   <td class="border-r-2 border-black px-4 py-2 font-medium uppercase">${entry.particulars}</td>
                   <td class="border-r-2 border-black px-4 py-2 text-right font-medium">${entry.debit > 0 ? entry.debit.toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''}</td>
                   <td class="px-4 py-2 text-right font-medium">${entry.credit > 0 ? entry.credit.toLocaleString(undefined, { minimumFractionDigits: 2 }) : ''}</td>
@@ -163,6 +193,7 @@ export function renderLedger(container) {
                 <tr class="h-10">
                   <td class="border-r-2 border-black px-4 py-2"></td>
                   <td class="border-r-2 border-black px-4 py-2"></td>
+                  <td class="border-r-2 border-black px-4 py-2"></td>
                   <td class="border-r-2 border-black px-4 py-2 text-right"></td>
                   <td class="px-4 py-2 text-right"></td>
                 </tr>
@@ -170,12 +201,12 @@ export function renderLedger(container) {
             </tbody>
             <tfoot>
               <tr class="border-t-2 border-black bg-white">
-                <td colspan="2" class="border-r-2 border-black px-4 py-2 text-center font-medium uppercase italic">GRAND TOTAL</td>
+                <td colspan="3" class="border-r-2 border-black px-4 py-2 text-center font-medium uppercase italic">GRAND TOTAL</td>
                 <td class="border-r-2 border-black px-4 py-2 text-right font-medium">${totalDebit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
                 <td class="px-4 py-2 text-right font-medium">${totalCredit.toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
               </tr>
               <tr class="border-t-2 border-black bg-white">
-                <td colspan="3" class="border-r-2 border-black px-4 py-2 text-center font-medium uppercase italic">NET CLOSING BALANCE</td>
+                <td colspan="4" class="border-r-2 border-black px-4 py-2 text-center font-medium uppercase italic">NET CLOSING BALANCE</td>
                 <td class="px-4 py-2 text-right font-medium">${Math.abs(closingBalance).toLocaleString(undefined, { minimumFractionDigits: 2 })}</td>
               </tr>
             </tfoot>
@@ -317,38 +348,39 @@ export function renderLedger(container) {
     doc.setFont('helvetica', 'bold');
     doc.text('FROM DATE', margin + contentWidth / 2 + 5, infoY);
     doc.setFont('helvetica', 'bold');
-    doc.text(from, margin + contentWidth / 2 + 45, infoY);
+    doc.text(formatDate(from), margin + contentWidth / 2 + 45, infoY);
     doc.line(margin + contentWidth / 2 + 45, infoY + 2, margin + contentWidth - 5, infoY + 2);
 
     doc.setFont('helvetica', 'bold');
     doc.text('TO DATE', margin + contentWidth / 2 + 5, infoY + 10);
     doc.setFont('helvetica', 'bold');
-    doc.text(to, margin + contentWidth / 2 + 45, infoY + 10);
+    doc.text(formatDate(to), margin + contentWidth / 2 + 45, infoY + 10);
     doc.line(margin + contentWidth / 2 + 45, infoY + 12, margin + contentWidth - 5, infoY + 12);
 
     // Table
     autoTable(doc, {
       startY: infoY + 20,
       margin: { left: margin, right: margin },
-      head: [['SR NO', 'PARTICULARS', 'DEBIT', 'CREDIT']],
+      head: [['SR NO', 'DATED', 'PARTICULARS', 'DEBIT', 'CREDIT']],
       body: [
         ...entries.map((e, i) => [
           i + 1,
+          formatDate(e.date),
           e.particulars.toUpperCase(),
           e.debit > 0 ? e.debit.toFixed(2) : '',
           e.credit > 0 ? e.credit.toFixed(2) : ''
         ]),
         // Add empty rows to match the reference look if needed
-        ...Array.from({ length: Math.max(0, 15 - entries.length) }).map(() => ['', '', '', ''])
+        ...Array.from({ length: Math.max(0, 15 - entries.length) }).map(() => ['', '', '', '', ''])
       ],
       foot: [
         [
-          { content: 'GRAND TOTAL', colSpan: 2, styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'GRAND TOTAL', colSpan: 3, styles: { halign: 'center', fontStyle: 'bold' } },
           { content: tDebit.toFixed(2), styles: { halign: 'right', fontStyle: 'bold' } },
           { content: tCredit.toFixed(2), styles: { halign: 'right', fontStyle: 'bold' } }
         ],
         [
-          { content: 'NET CLOSING BALANCE', colSpan: 3, styles: { halign: 'center', fontStyle: 'bold' } },
+          { content: 'NET CLOSING BALANCE', colSpan: 4, styles: { halign: 'center', fontStyle: 'bold' } },
           { content: Math.abs(balance).toFixed(2), styles: { halign: 'right', fontStyle: 'bold' } }
         ]
       ],
@@ -368,9 +400,10 @@ export function renderLedger(container) {
         lineWidth: 0.5,
       },
       columnStyles: {
-        0: { cellWidth: 20 },
-        2: { halign: 'right', cellWidth: 40 },
-        3: { halign: 'right', cellWidth: 40 },
+        0: { cellWidth: 15 },
+        1: { cellWidth: 25 },
+        3: { halign: 'right', cellWidth: 35 },
+        4: { halign: 'right', cellWidth: 35 },
       },
       tableLineColor: [0, 0, 0],
       tableLineWidth: 0.5,
@@ -385,7 +418,7 @@ export function renderLedger(container) {
       didParseCell: function(data) {
         // Vertical line for SR NO etc
         data.cell.styles.lineWidth = 0.5;
-        if (data.column.index === 3) {
+        if (data.column.index === 4) {
            data.cell.styles.borderWidth = { top: 0, right: 0.5, bottom: 0.5, left: 0 };
         }
       }

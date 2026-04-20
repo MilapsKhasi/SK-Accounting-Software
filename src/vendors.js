@@ -36,6 +36,9 @@ export function renderVendors(container) {
                   <td class="px-6 py-4 text-sm text-gray-500">${vendor.phone || 'N/A'}</td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button class="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" title="Make Payment" onclick="event.stopPropagation(); window.openGlobalPaymentModal('vendor', '${vendor.id}')">
+                        <i data-lucide="wallet" class="w-4 h-4"></i>
+                      </button>
                       <button class="p-1.5 text-gray-400 hover:text-[#1e2a38] hover:bg-gray-100 transition-colors" title="View Ledger" onclick="event.stopPropagation(); window.navigateToLedger('vendor', '${vendor.id}')">
                         <i data-lucide="book-open" class="w-4 h-4"></i>
                       </button>
@@ -86,11 +89,14 @@ function openVendorModal(vendor = null) {
     email: '',
     phone: '',
     address: '',
+    openingBalance: 0,
+    openingBalanceDate: new Date().toISOString().split('T')[0],
+    openingBalancePaid: 0,
     createdAt: new Date().toISOString()
   };
 
   modal.innerHTML = `
-    <div class="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-200">
+    <div class="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-gray-100">
       <div class="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
         <h2 class="text-xl font-medium text-gray-900 uppercase tracking-tight">${isEditing ? 'Edit' : 'Add'} Vendor</h2>
         <button id="close-modal" class="p-2 hover:bg-gray-100 transition-colors">
@@ -99,9 +105,29 @@ function openVendorModal(vendor = null) {
       </div>
       
       <form id="vendor-form" class="p-8 space-y-6">
-        <div class="space-y-2">
-          <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Vendor Name</label>
-          <input name="name" value="${initialData.name}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" required />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Vendor Name</label>
+            <input name="name" value="${initialData.name}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" required />
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Opening Balance (₹)</label>
+            <input type="number" name="openingBalance" value="${initialData.openingBalance}" step="0.01" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Opening Balance Date</label>
+            <input type="date" name="openingBalanceDate" value="${initialData.openingBalanceDate}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" />
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Is Settled?</label>
+            <div class="flex items-center h-10 px-4">
+              <input type="checkbox" name="isSettled" ${initialData.openingBalancePaid >= initialData.openingBalance && initialData.openingBalance > 0 ? 'checked' : ''} class="w-4 h-4 text-[#1e2a38] border-gray-300 focus:ring-[#1e2a38]" />
+              <span class="ml-2 text-sm text-gray-500">Fully Paid</span>
+            </div>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -152,7 +178,10 @@ function openVendorModal(vendor = null) {
       contactPerson: form.contactPerson.value,
       email: form.email.value,
       phone: form.phone.value,
-      address: form.address.value
+      address: form.address.value,
+      openingBalance: parseFloat(form.openingBalance.value) || 0,
+      openingBalanceDate: form.openingBalanceDate.value,
+      openingBalancePaid: form.isSettled.checked ? (parseFloat(form.openingBalance.value) || 0) : initialData.openingBalancePaid
     };
 
     await saveVendor(vendorData);

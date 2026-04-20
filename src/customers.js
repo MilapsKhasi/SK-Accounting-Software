@@ -36,6 +36,9 @@ export function renderCustomers(container) {
                   <td class="px-6 py-4 text-sm text-gray-500">${customer.phone || 'N/A'}</td>
                   <td class="px-6 py-4 text-right">
                     <div class="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button class="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors" title="Receive Payment" onclick="event.stopPropagation(); window.openGlobalPaymentModal('customer', '${customer.id}')">
+                        <i data-lucide="wallet" class="w-4 h-4"></i>
+                      </button>
                       <button class="p-1.5 text-gray-400 hover:text-[#1e2a38] hover:bg-gray-100 transition-colors" title="View Ledger" onclick="event.stopPropagation(); window.navigateToLedger('customer', '${customer.id}')">
                         <i data-lucide="book-open" class="w-4 h-4"></i>
                       </button>
@@ -86,6 +89,9 @@ function openCustomerModal(customer = null) {
     email: '',
     phone: '',
     address: '',
+    openingBalance: 0,
+    openingBalanceDate: new Date().toISOString().split('T')[0],
+    openingBalancePaid: 0,
     createdAt: new Date().toISOString()
   };
 
@@ -99,9 +105,29 @@ function openCustomerModal(customer = null) {
       </div>
       
       <form id="customer-form" class="p-8 space-y-6">
-        <div class="space-y-2">
-          <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Customer Name</label>
-          <input name="name" value="${initialData.name}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" required />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Customer Name</label>
+            <input name="name" value="${initialData.name}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" required />
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Opening Balance (₹)</label>
+            <input type="number" name="openingBalance" value="${initialData.openingBalance}" step="0.01" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Opening Balance Date</label>
+            <input type="date" name="openingBalanceDate" value="${initialData.openingBalanceDate}" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-medium" />
+          </div>
+          <div class="space-y-2">
+            <label class="text-xs font-medium text-gray-400 uppercase tracking-widest">Is Settled?</label>
+            <div class="flex items-center h-10 px-4">
+              <input type="checkbox" name="isSettled" ${initialData.openingBalancePaid >= initialData.openingBalance && initialData.openingBalance > 0 ? 'checked' : ''} class="w-4 h-4 text-[#1e2a38] border-gray-300 focus:ring-[#1e2a38]" />
+              <span class="ml-2 text-sm text-gray-500">Fully Paid</span>
+            </div>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -152,7 +178,10 @@ function openCustomerModal(customer = null) {
       contactPerson: form.contactPerson.value,
       email: form.email.value,
       phone: form.phone.value,
-      address: form.address.value
+      address: form.address.value,
+      openingBalance: parseFloat(form.openingBalance.value) || 0,
+      openingBalanceDate: form.openingBalanceDate.value,
+      openingBalancePaid: form.isSettled.checked ? (parseFloat(form.openingBalance.value) || 0) : initialData.openingBalancePaid
     };
 
     await saveCustomer(customerData);
