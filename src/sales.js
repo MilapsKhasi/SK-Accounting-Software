@@ -178,46 +178,16 @@ function openSalesModal(entry = null) {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-2">
               <label class="text-xs font-bold text-gray-400 uppercase tracking-widest">Status</label>
-              <select name="status" id="status-select" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold">
-                <option value="Pending" ${initialData.status === 'Pending' ? 'selected' : ''}>Pending</option>
-                <option value="Partially" ${initialData.status === 'Partially' ? 'selected' : ''}>Partially</option>
-                <option value="Paid" ${initialData.status === 'Paid' ? 'selected' : ''}>Paid</option>
-              </select>
-            </div>
-          </div>
-
-          <div id="payments-section" class="${initialData.status === 'Partially' ? '' : 'hidden'} space-y-4">
-            <div class="flex justify-between items-center">
-              <h3 class="text-sm font-bold text-gray-900 uppercase tracking-widest">Payments</h3>
-              <button type="button" id="add-payment-btn" class="text-[10px] font-bold text-[#1e2a38] hover:text-[#2c3e50] flex items-center gap-1 bg-[#ffcd00] px-3 py-1 uppercase tracking-widest">
-                <i data-lucide="plus" class="w-3 h-3"></i> Add Payment
-              </button>
-            </div>
-            <div id="payments-list" class="space-y-3">
-              ${currentPayments.map((p, i) => `
-                <div class="flex gap-3 items-end bg-gray-50 p-4 border border-gray-200">
-                  <div class="flex-1 space-y-1">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Amount</label>
-                    <input type="number" data-payment-index="${i}" data-field="amount" value="${p.amount}" class="w-full px-3 py-2 border border-gray-100 font-bold" />
-                  </div>
-                  <div class="flex-1 space-y-1">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Method</label>
-                    <select data-payment-index="${i}" data-field="method" class="w-full px-3 py-2 border border-gray-100 font-bold">
-                      <option value="Cash" ${p.method === 'Cash' ? 'selected' : ''}>Cash</option>
-                      <option value="Bank" ${p.method === 'Bank' ? 'selected' : ''}>Bank</option>
-                      <option value="UPI" ${p.method === 'UPI' ? 'selected' : ''}>UPI</option>
-                      <option value="Cheque" ${p.method === 'Cheque' ? 'selected' : ''}>Cheque</option>
-                    </select>
-                  </div>
-                  <div class="flex-1 space-y-1">
-                    <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Date</label>
-                    <input type="date" data-payment-index="${i}" data-field="date" value="${p.date || initialData.date}" class="w-full px-3 py-2 border border-gray-100 font-bold" />
-                  </div>
-                  <button type="button" data-remove-payment="${i}" class="p-2 text-[#f44336] hover:bg-red-50 transition-colors">
-                    <i data-lucide="trash-2" class="w-4 h-4"></i>
-                  </button>
-                </div>
-              `).join('')}
+              <div class="flex gap-2">
+                <select name="status" id="status-select" class="flex-1 px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold">
+                  <option value="Pending" ${initialData.status === 'Pending' ? 'selected' : ''}>Pending</option>
+                  <option value="Partially" ${initialData.status === 'Partially' ? 'selected' : ''}>Partially</option>
+                  <option value="Paid" ${initialData.status === 'Paid' ? 'selected' : ''}>Paid</option>
+                </select>
+                <button type="button" id="manage-payments-btn" class="${initialData.status === 'Partially' ? '' : 'hidden'} px-3 bg-[#ffcd00] text-[#1e2a38] text-[10px] font-bold uppercase tracking-widest flex items-center gap-1">
+                  <i data-lucide="wallet" class="w-3 h-3"></i> Manage
+                </button>
+              </div>
             </div>
           </div>
 
@@ -260,27 +230,144 @@ function openSalesModal(entry = null) {
       document.getElementById('display-net').innerText = `₹${netBill.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
       document.getElementById('display-balance').innerText = `₹${balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
 
-      const addPaymentBtn = document.getElementById('add-payment-btn');
-      if (addPaymentBtn) {
-        if (balance <= 0) {
-          addPaymentBtn.disabled = true;
-          addPaymentBtn.classList.add('opacity-50', 'cursor-not-allowed');
-        } else {
-          addPaymentBtn.disabled = false;
-          addPaymentBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-        }
-      }
-
       return { amount, gstAmount, netBill, balance };
     };
 
+    const openPartialPaymentModal = () => {
+      const { netBill } = calculate();
+      const secondModal = document.createElement('div');
+      secondModal.className = 'fixed inset-0 z-[60] flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-md';
+      
+      const renderSecondModal = () => {
+        const totalAlreadyPaid = currentPayments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+        const outstanding = netBill - totalAlreadyPaid;
+
+        secondModal.innerHTML = `
+          <div class="bg-white w-full max-w-lg border border-gray-200 shadow-2xl">
+            <div class="p-6 border-b border-gray-100 flex justify-between items-center">
+              <h2 class="text-xl font-bold text-gray-900 uppercase tracking-tight">Partial Payment</h2>
+              <button id="close-partial" class="p-2 hover:bg-gray-100 transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+              </button>
+            </div>
+            
+            <div class="p-8 space-y-6">
+              <div class="bg-[#1e2a38] p-6 text-white text-center">
+                <p class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Outstanding Amount</p>
+                <h3 id="modal-outstanding" class="text-3xl font-black mt-1">₹${outstanding.toLocaleString(undefined, { minimumFractionDigits: 2 })}</h3>
+              </div>
+
+              <div class="space-y-4">
+                <div class="space-y-2">
+                  <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Paid Amount</label>
+                  <div class="flex gap-2">
+                    <input type="number" id="partial-amount-input" placeholder="Enter Amount" class="flex-1 px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold text-lg" />
+                    <button type="button" id="pay-remaining-btn" class="px-4 bg-[#ffcd00] text-[#1e2a38] text-[10px] font-bold uppercase tracking-widest hover:bg-[#e6b800] transition-colors">
+                      Pay Remaining
+                    </button>
+                  </div>
+                </div>
+
+                <div class="space-y-2">
+                  <label class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Method</label>
+                  <select id="partial-method-select" class="w-full px-4 py-2 border border-gray-200 focus:ring-1 focus:ring-[#1e2a38] outline-none transition-all font-bold">
+                    <option value="Cash">Cash</option>
+                    <option value="Bank">Bank</option>
+                    <option value="UPI">UPI</option>
+                    <option value="Cheque">Cheque</option>
+                  </select>
+                </div>
+
+                <button type="button" id="create-new-payment-btn" class="w-full py-3 bg-[#1e2a38] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#2c3e50] transition-all">
+                  Create New Payment
+                </button>
+              </div>
+
+              <div class="pt-4 border-t border-gray-100">
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Recent Payments</p>
+                <div class="max-h-40 overflow-y-auto space-y-2">
+                  ${currentPayments.length === 0 ? '<p class="text-xs text-gray-400 italic">No payments added yet</p>' : ''}
+                  ${currentPayments.map((p, i) => `
+                    <div class="flex justify-between items-center text-xs p-2 bg-gray-50 border border-gray-100 font-bold">
+                      <div>
+                        <span class="text-gray-900">₹${p.amount.toLocaleString()}</span>
+                        <span class="text-gray-400 ml-2">via ${p.method}</span>
+                      </div>
+                      <button type="button" class="text-[#f44336] hover:bg-red-50 p-1" onclick="this.dispatchEvent(new CustomEvent('remove-pay', { detail: ${i}, bubbles: true }))">
+                        <i data-lucide="trash-2" class="w-3 h-3"></i>
+                      </button>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            </div>
+
+            <div class="p-6 bg-gray-50 flex justify-end gap-3">
+              <button id="cancel-partial" class="px-6 py-2 text-xs font-bold text-gray-500 hover:text-gray-900 uppercase tracking-widest">Cancel</button>
+              <button id="done-partial" class="px-8 py-2 bg-[#1e2a38] text-white text-xs font-bold uppercase tracking-widest hover:bg-[#2c3e50]">Done</button>
+            </div>
+          </div>
+        `;
+
+        window.renderIcons();
+
+        const amountInput = secondModal.querySelector('#partial-amount-input');
+        const outstandingDisplay = secondModal.querySelector('#modal-outstanding');
+
+        amountInput.oninput = (e) => {
+          const typed = parseFloat(e.target.value) || 0;
+          const currentOutstanding = outstanding - typed;
+          outstandingDisplay.innerText = `₹${currentOutstanding.toLocaleString(undefined, { minimumFractionDigits: 2 })}`;
+          
+          if (typed > outstanding) {
+            outstandingDisplay.classList.add('text-[#f44336]');
+          } else {
+            outstandingDisplay.classList.remove('text-[#f44336]');
+          }
+        };
+
+        secondModal.querySelector('#pay-remaining-btn').onclick = () => {
+          amountInput.value = outstanding;
+          amountInput.dispatchEvent(new Event('input'));
+        };
+
+        secondModal.querySelector('#create-new-payment-btn').onclick = () => {
+          const amt = parseFloat(amountInput.value) || 0;
+          if (amt <= 0) return;
+          
+          if (amt > outstanding) {
+            alert(`You have to give ₹${(amt - outstanding).toLocaleString()} to the customer ${form.customer.value}`);
+          }
+
+          const method = secondModal.querySelector('#partial-method-select').value;
+          currentPayments.push({ amount: amt, method, date: new Date().toISOString().split('T')[0] });
+          renderSecondModal();
+        };
+
+        secondModal.onremovepay = (e) => {
+          currentPayments.splice(e.detail, 1);
+          renderSecondModal();
+        };
+        // Standard event listener for the custom event
+        secondModal.addEventListener('remove-pay', (e) => {
+          currentPayments.splice(e.detail, 1);
+          renderSecondModal();
+        });
+
+        secondModal.querySelector('#close-partial').onclick = () => secondModal.remove();
+        secondModal.querySelector('#cancel-partial').onclick = () => secondModal.remove();
+        secondModal.querySelector('#done-partial').onclick = () => {
+          calculate();
+          secondModal.remove();
+        };
+      };
+
+      document.body.appendChild(secondModal);
+      renderSecondModal();
+    };
+
     form.oninput = (e) => {
-      if (e.target.dataset.paymentIndex !== undefined) {
-        const idx = parseInt(e.target.dataset.paymentIndex);
-        const field = e.target.dataset.field;
-        currentPayments[idx][field] = e.target.value;
-      }
-      const { amount, gstAmount, netBill, balance } = calculate();
+      const { amount, gstAmount, netBill } = calculate();
       
       // Save draft
       if (!isEditing) {
@@ -301,34 +388,23 @@ function openSalesModal(entry = null) {
 
     statusSelect.onchange = (e) => {
       const status = e.target.value;
+      const manageBtn = document.getElementById('manage-payments-btn');
       if (status === 'Partially') {
-        paymentsSection.classList.remove('hidden');
-      } else if (status === 'Paid') {
-        paymentsSection.classList.add('hidden');
-        const { netBill } = calculate();
-        currentPayments = [{ amount: netBill, date: form.date.value, method: 'Cash' }];
+        manageBtn.classList.remove('hidden');
+        openPartialPaymentModal();
       } else {
-        paymentsSection.classList.add('hidden');
-        currentPayments = [];
+        manageBtn.classList.add('hidden');
+        if (status === 'Paid') {
+          const { netBill } = calculate();
+          currentPayments = [{ amount: netBill, date: form.date.value, method: 'Cash' }];
+        } else {
+          currentPayments = [];
+        }
       }
       calculate();
     };
 
-    document.getElementById('add-payment-btn').onclick = () => {
-      const { balance } = calculate();
-      if (balance > 0) {
-        currentPayments.push({ amount: balance, date: form.date.value, method: 'Cash' });
-        renderModalContent();
-      }
-    };
-
-    document.querySelectorAll('[data-remove-payment]').forEach(btn => {
-      btn.onclick = () => {
-        const idx = parseInt(btn.dataset.removePayment);
-        currentPayments.splice(idx, 1);
-        renderModalContent();
-      };
-    });
+    document.getElementById('manage-payments-btn').onclick = openPartialPaymentModal;
 
     form.onsubmit = async (e) => {
       e.preventDefault();
