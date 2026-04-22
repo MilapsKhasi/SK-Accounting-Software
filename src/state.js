@@ -4,7 +4,7 @@ export const state = {
   session: null,
   loading: true,
   company: {
-    company_name: "SK Enterprise",
+    company_name: "ZenterPrime GST",
     gst_number: "",
     address: "",
     creation_date: new Date().toISOString().split('T')[0],
@@ -94,7 +94,7 @@ export async function initData(silent = false) {
     }));
 
     state.company = {
-      company_name: profile?.company_name || "SK Enterprise",
+      company_name: profile?.company_name || "ZenterPrime GST",
       gst_number: profile?.gst_number || "",
       address: profile?.address || "",
       creation_date: profile?.creation_date || new Date().toISOString().split('T')[0],
@@ -131,7 +131,7 @@ export async function initData(silent = false) {
     if (!profile && state.session?.user?.id) {
       await supabase.from('profiles').upsert({
         user_id: state.session.user.id,
-        company_name: "SK Enterprise",
+        company_name: "ZenterPrime GST",
       });
     }
   } catch (error) {

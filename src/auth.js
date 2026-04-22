@@ -10,7 +10,7 @@ export function renderAuth(container) {
           </div>
         </div>
         <h2 class="mt-6 text-center text-3xl font-medium text-gray-900 tracking-tighter uppercase">
-          SK Accounting
+          ZenterPrime GST
         </h2>
         <p class="mt-2 text-center text-xs font-medium text-gray-500 uppercase tracking-widest">
           Sign in to manage your business

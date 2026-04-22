@@ -31,7 +31,7 @@ function updateUI(container) {
       <div class="min-h-screen bg-white flex items-center justify-center">
         <div class="flex flex-col items-center gap-4">
           <div class="w-12 h-12 border-4 border-[#1e2a38] border-t-transparent animate-spin"></div>
-          <p class="text-sm font-medium text-gray-500 uppercase tracking-widest">Loading SK Accounting...</p>
+          <p class="text-sm font-medium text-gray-500 uppercase tracking-widest">Loading ZenterPrime GST...</p>
         </div>
       </div>
     `;
@@ -60,7 +60,7 @@ function updateUI(container) {
           <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
             <img src="/logo.svg" alt="Logo" class="w-full h-full object-contain" referrerPolicy="no-referrer" />
           </div>
-          <span class="font-medium text-lg tracking-tight truncate text-white ${isSidebarOpen ? '' : 'hidden'}">SK Accounting</span>
+          <span class="font-medium text-lg tracking-tight truncate text-white ${isSidebarOpen ? '' : 'hidden'}">ZenterPrime GST</span>
         </div>
 
         <nav class="flex-1 p-4 space-y-1 overflow-y-auto">

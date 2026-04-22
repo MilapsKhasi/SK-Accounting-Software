@@ -13,7 +13,7 @@ DROP TABLE IF EXISTS profiles CASCADE;
 -- 2. Create Profiles table (Company settings)
 CREATE TABLE profiles (
   user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  company_name TEXT DEFAULT 'SK Enterprise',
+  company_name TEXT DEFAULT 'ZenterPrime GST',
   gst_number TEXT,
   address TEXT,
   creation_date DATE DEFAULT CURRENT_DATE

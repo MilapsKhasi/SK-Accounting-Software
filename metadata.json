@@ -1,5 +1,6 @@
 {
-  "name": "SK Accounting",
-  "description": "A professional web-based accounting system for SK Enterprise.",
-  "requestFramePermissions": []
+  "name": "ZenterPrime GST",
+  "description": "A professional web-based accounting system.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
 }
