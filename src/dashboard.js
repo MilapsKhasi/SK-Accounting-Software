@@ -9,9 +9,6 @@ import { renderGSTSummary } from './gst-summary';
 import { renderReports } from './reports';
 import { renderLedger } from './ledger';
 
-let activeTab = 'dashboard';
-let isSidebarOpen = true;
-
 export function renderDashboard(container) {
   setupSubscriptions();
 
@@ -55,19 +52,19 @@ function updateUI(container) {
   container.innerHTML = `
     <div class="min-h-screen bg-[#f8f9fb] flex font-sans text-gray-900">
       <!-- Sidebar -->
-      <aside id="sidebar" class="bg-[#1e2a38] flex flex-col h-screen sticky top-0 z-20 transition-all duration-300" style="width: ${isSidebarOpen ? '280px' : '80px'}">
+      <aside id="sidebar" class="bg-[#1e2a38] flex flex-col h-screen sticky top-0 z-20 transition-all duration-300" style="width: ${state.ui.isSidebarOpen ? '280px' : '80px'}">
         <div class="p-6 flex items-center gap-3 border-b border-white/10">
           <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
             <img src="/logo.svg" alt="Logo" class="w-full h-full object-contain" referrerPolicy="no-referrer" />
           </div>
-          <span class="font-medium text-lg tracking-tight truncate text-white ${isSidebarOpen ? '' : 'hidden'}">ZenterPrime GST</span>
+          <span class="font-medium text-lg tracking-tight truncate text-white ${state.ui.isSidebarOpen ? '' : 'hidden'}">ZenterPrime GST</span>
         </div>
 
         <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
           ${navItems.map(item => `
-            <button data-tab="${item.id}" class="w-full flex items-center gap-3 p-3 transition-all duration-200 ${activeTab === item.id ? 'bg-[#ffcd00] text-[#1e2a38] font-medium' : 'text-gray-400 hover:bg-white/5 hover:text-white'}">
+            <button data-tab="${item.id}" class="w-full flex items-center gap-3 p-3 transition-all duration-200 ${state.ui.activeTab === item.id ? 'bg-[#ffcd00] text-[#1e2a38] font-medium' : 'text-gray-400 hover:bg-white/5 hover:text-white'}">
               <i data-lucide="${item.icon}" class="w-5 h-5 flex-shrink-0"></i>
-              <span class="${isSidebarOpen ? '' : 'hidden'}">${item.label}</span>
+              <span class="${state.ui.isSidebarOpen ? '' : 'hidden'}">${item.label}</span>
             </button>
           `).join('')}
         </nav>
@@ -75,10 +72,10 @@ function updateUI(container) {
         <div class="p-4 border-t border-white/10 space-y-1">
           <button id="logout-btn" class="w-full flex items-center gap-3 p-3 transition-all duration-200 bg-[#f44336] text-white hover:bg-[#d32f2f]">
             <i data-lucide="log-out" class="w-5 h-5 flex-shrink-0"></i>
-            <span class="font-medium ${isSidebarOpen ? '' : 'hidden'}">Sign Out</span>
+            <span class="font-medium ${state.ui.isSidebarOpen ? '' : 'hidden'}">Sign Out</span>
           </button>
           <button id="toggle-sidebar" class="w-full flex items-center justify-center p-3 hover:bg-white/5 text-gray-400 transition-colors">
-            <i data-lucide="${isSidebarOpen ? 'x' : 'menu'}" class="w-5 h-5"></i>
+            <i data-lucide="${state.ui.isSidebarOpen ? 'x' : 'menu'}" class="w-5 h-5"></i>
           </button>
         </div>
       </aside>
@@ -114,7 +111,7 @@ function updateUI(container) {
   // Event Listeners
   document.querySelectorAll('[data-tab]').forEach(btn => {
     btn.onclick = () => {
-      activeTab = btn.dataset.tab;
+      state.ui.activeTab = btn.dataset.tab;
       updateUI(container);
     };
   });
@@ -125,7 +122,7 @@ function updateUI(container) {
   };
 
   document.getElementById('toggle-sidebar').onclick = () => {
-    isSidebarOpen = !isSidebarOpen;
+    state.ui.isSidebarOpen = !state.ui.isSidebarOpen;
     updateUI(container);
   };
 
@@ -141,13 +138,13 @@ function updateUI(container) {
     'ledger': renderLedger
   };
 
-  if (moduleContainers[activeTab]) {
-    moduleContainers[activeTab](document.getElementById(`${activeTab}-container`));
+  if (moduleContainers[state.ui.activeTab]) {
+    moduleContainers[state.ui.activeTab](document.getElementById(`${state.ui.activeTab}-container`));
   }
 }
 
 window.navigateToLedger = (partyType, partyId) => {
-  activeTab = 'ledger';
+  state.ui.activeTab = 'ledger';
   // We need to pass the selected party to the ledger module.
   // Since we're using a simple updateUI, we can store these in a temporary global or state.
   window.ledgerSelection = { partyType, partyId };
@@ -156,7 +153,7 @@ window.navigateToLedger = (partyType, partyId) => {
 };
 
 function renderActiveTab() {
-  switch (activeTab) {
+  switch (state.ui.activeTab) {
     case 'dashboard':
       return renderDashboardView();
     case 'sales':
@@ -167,7 +164,7 @@ function renderActiveTab() {
     case 'gst-summary':
     case 'reports':
     case 'ledger':
-      return `<div id="${activeTab}-container"></div>`;
+      return `<div id="${state.ui.activeTab}-container"></div>`;
     default:
       return `
         <div class="p-8 flex flex-col items-center justify-center h-[60vh] text-center">

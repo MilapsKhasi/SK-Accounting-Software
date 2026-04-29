@@ -29,10 +29,11 @@ CREATE TABLE vendors (
   email TEXT,
   phone TEXT,
   address TEXT,
-  created_at DATE DEFAULT CURRENT_DATE
+  created_at DATE DEFAULT CURRENT_DATE,
+  opening_balance NUMERIC DEFAULT 0,
+  opening_balance_paid NUMERIC DEFAULT 0,
+  opening_balance_date DATE
 );
-
--- 4. Create Customers table
 CREATE TABLE customers (
   id TEXT PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -42,7 +43,10 @@ CREATE TABLE customers (
   email TEXT,
   phone TEXT,
   address TEXT,
-  created_at DATE DEFAULT CURRENT_DATE
+  created_at DATE DEFAULT CURRENT_DATE,
+  opening_balance NUMERIC DEFAULT 0,
+  opening_balance_paid NUMERIC DEFAULT 0,
+  opening_balance_date DATE
 );
 
 -- 5. Create Purchase Entries table

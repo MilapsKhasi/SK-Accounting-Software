@@ -3,6 +3,10 @@ import { supabase } from './lib/supabase';
 export const state = {
   session: null,
   loading: true,
+  ui: {
+    activeTab: 'dashboard',
+    isSidebarOpen: true
+  },
   company: {
     company_name: "ZenterPrime GST",
     gst_number: "",
